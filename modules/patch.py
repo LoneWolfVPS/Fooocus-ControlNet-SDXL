@@ -1,4 +1,3 @@
-import contextlib
 import os
 import torch
 import time
@@ -39,7 +38,6 @@ cfg_x0 = 0.0
 cfg_s = 1.0
 cfg_cin = 1.0
 adaptive_cfg = 0.7
-eps_record = None
 
 
 def calculate_weight_patched(self, patches, weight, key):
@@ -194,12 +192,10 @@ def patched_sampler_cfg_function(args):
 
 
 def patched_discrete_eps_ddpm_denoiser_forward(self, input, sigma, **kwargs):
-    global cfg_x0, cfg_s, cfg_cin, eps_record
+    global cfg_x0, cfg_s, cfg_cin
     c_out, c_in = [utils.append_dims(x, input.ndim) for x in self.get_scalings(sigma)]
     cfg_x0, cfg_s, cfg_cin = input, c_out, c_in
     eps = self.get_eps(input * c_in, self.sigma_to_t(sigma), **kwargs)
-    if eps_record is not None:
-        eps_record = eps.clone().cpu()
     return input + eps * c_out
 
 
@@ -286,6 +282,8 @@ globalBrownianTreeNoiseSampler = None
 @torch.no_grad()
 def sample_dpmpp_fooocus_2m_sde_inpaint_seamless(model, x, sigmas, extra_args=None, callback=None,
                                                  disable=None, eta=1., s_noise=1., **kwargs):
+    global sigma_min, sigma_max
+
     print('[Sampler] Fooocus sampler is activated.')
 
     seed = extra_args.get("seed", None)
@@ -459,6 +457,23 @@ def patched_unet_forward(self, x, timesteps=None, context=None, y=None, control=
         return self.out(h)
 
 
+def text_encoder_device_patched():
+    # Fooocus's style system uses text encoder much more times than fcbh so this makes things much faster.
+    return fcbh.model_management.get_torch_device()
+
+
+def patched_get_autocast_device(dev):
+    # https://github.com/lllyasviel/Fooocus/discussions/571
+    # https://github.com/lllyasviel/Fooocus/issues/620
+    result = ''
+    if hasattr(dev, 'type'):
+        result = str(dev.type)
+    if 'cuda' in result:
+        return 'cuda'
+    else:
+        return 'cpu'
+
+
 def patched_load_models_gpu(*args, **kwargs):
     execution_start_time = time.perf_counter()
     y = fcbh.model_management.load_models_gpu_origin(*args, **kwargs)
@@ -520,6 +535,8 @@ def patch_all():
         fcbh.model_management.load_models_gpu_origin = fcbh.model_management.load_models_gpu
 
     fcbh.model_management.load_models_gpu = patched_load_models_gpu
+    fcbh.model_management.get_autocast_device = patched_get_autocast_device
+    fcbh.model_management.text_encoder_device = text_encoder_device_patched
     fcbh.model_patcher.ModelPatcher.calculate_weight = calculate_weight_patched
     fcbh.cldm.cldm.ControlNet.forward = patched_cldm_forward
     fcbh.ldm.modules.diffusionmodules.openaimodel.UNetModel.forward = patched_unet_forward

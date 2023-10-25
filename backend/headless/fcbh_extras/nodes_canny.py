@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import fcbh.model_management
 
 def get_canny_nms_kernel(device=None, dtype=None):
-    """Utility function that returns 3x3 kernels for the Canny Non-maximal suppression."""
+    """Utility function that returns 3x3 kernels for the PyramidCanny Non-maximal suppression."""
     return torch.tensor(
         [
             [[[0.0, 0.0, 0.0], [0.0, 1.0, -1.0], [0.0, 0.0, 0.0]]],
@@ -24,7 +24,7 @@ def get_canny_nms_kernel(device=None, dtype=None):
 
 
 def get_hysteresis_kernel(device=None, dtype=None):
-    """Utility function that returns the 3x3 kernels for the Canny hysteresis."""
+    """Utility function that returns the 3x3 kernels for the PyramidCanny hysteresis."""
     return torch.tensor(
         [
             [[[0.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]],
@@ -159,7 +159,7 @@ def canny(
     hysteresis = True,
     eps = 1e-6,
 ):
-    r"""Find edges of the input image and filters them using the Canny algorithm.
+    r"""Find edges of the input image and filters them using the PyramidCanny algorithm.
     .. image:: _static/img/canny.png
     Args:
         input: input image tensor with shape :math:`(B,C,H,W)`.
@@ -295,5 +295,5 @@ class Canny:
         return (img_out,)
 
 NODE_CLASS_MAPPINGS = {
-    "Canny": Canny,
+    "PyramidCanny": Canny,
 }

@@ -19,14 +19,31 @@ SAMPLER_NAMES = KSAMPLER_NAMES + ["ddim", "uni_pc", "uni_pc_bh2"]
 
 sampler_list = SAMPLER_NAMES
 scheduler_list = SCHEDULER_NAMES
-
 cn_ip = "Image Prompt"
+cn_depth = "Depth"
 cn_canny = "PyraCanny"
 cn_cpds = "CPDS"
+cn_pose = 'Pose'
+cn_reColor = 'ReColor'
+cn_Sketch = 'sketch'
+# cn_revision = 'revision'
+# cn_tileBlur = 'TileBlur'
+# cn_tileBlurAnime = 'TileBlurAnime'
 
-ip_list = [cn_ip, cn_canny, cn_cpds]
+ip_list = [cn_ip, cn_canny, cn_cpds, cn_depth, cn_pose, cn_reColor, cn_Sketch,
+           # cn_revision, cn_tileBlur,cn_tileBlurAnime
+           ]
 default_ip = cn_ip
 
 default_parameters = {
-    cn_ip: (0.5, 0.6), cn_canny: (0.5, 1.0), cn_cpds: (0.5, 1.0)
+    cn_ip: (0.5, 0.6),
+    cn_canny: (0.5, 1.0),
+    cn_cpds: (0.5, 1.0),
+    cn_depth: (0.5, 1.0),
+    cn_pose: (0.5, 1.0),
+    cn_reColor: (0.5, 1.0),
+    cn_Sketch: (0.5, 1.0),
+    # cn_revision: (0.5, 1.0),
+    # cn_tileBlur: (0.5, 1.0),
+    # cn_tileBlurAnime: (0.5, 1.0),
 }  # stop, weight

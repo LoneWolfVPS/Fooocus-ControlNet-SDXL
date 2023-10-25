@@ -9,16 +9,14 @@ import modules.path
 import fooocus_version
 import modules.html
 import modules.async_worker as worker
-import modules.constants as constants
 import modules.flags as flags
 import modules.gradio_hijack as grh
 import modules.advanced_parameters as advanced_parameters
 import args_manager
 
-from modules.sdxl_styles import legal_style_names
+from modules.sdxl_styles import legal_style_names, aspect_ratios
 from modules.private_logger import get_current_html_path
 from modules.ui_gradio_extensions import reload_javascript
-from modules.auth import auth_enabled, check_auth
 
 
 def generate_clicked(*args):
@@ -59,20 +57,16 @@ shared.gradio_root = gr.Blocks(
 
 with shared.gradio_root:
     with gr.Row():
-        with gr.Column(scale=2):
+        with gr.Column():
             progress_window = grh.Image(label='Preview', show_label=True, height=640, visible=False)
             progress_html = gr.HTML(value=modules.html.make_progress_html(32, 'Progress 32%'), visible=False, elem_id='progress-bar', elem_classes='progress-bar')
             gallery = gr.Gallery(label='Gallery', show_label=False, object_fit='contain', height=745, visible=True, elem_classes='resizable_area')
             with gr.Row(elem_classes='type_row'):
-                with gr.Column(scale=17):
+                with gr.Column(scale=0.85):
                     prompt = gr.Textbox(show_label=False, placeholder="Type prompt here.",
+                                        value=modules.path.default_positive_prompt,
                                         container=False, autofocus=True, elem_classes='type_row', lines=1024)
-
-                    if isinstance(modules.path.default_positive_prompt, str) \
-                            and modules.path.default_positive_prompt != '':
-                        shared.gradio_root.load(lambda: modules.path.default_positive_prompt, outputs=prompt)
-
-                with gr.Column(scale=3, min_width=0):
+                with gr.Column(scale=0.15, min_width=0):
                     generate_button = gr.Button(label="Generate", value="Generate", elem_classes='type_row', elem_id='generate_button', visible=True)
                     skip_button = gr.Button(label="Skip", value="Skip", elem_classes='type_row_half', visible=False)
                     stop_button = gr.Button(label="Stop", value="Stop", elem_classes='type_row_half', elem_id='stop_button', visible=False)
@@ -93,7 +87,7 @@ with shared.gradio_root:
                     skip_button.click(skip_clicked, queue=False)
             with gr.Row(elem_classes='advanced_check_row'):
                 input_image_checkbox = gr.Checkbox(label='Input Image', value=False, container=False, elem_classes='min_check')
-                advanced_checkbox = gr.Checkbox(label='Advanced', value=modules.path.default_advanced_checkbox, container=False, elem_classes='min_check')
+                advanced_checkbox = gr.Checkbox(label='Advanced', value=False, container=False, elem_classes='min_check')
             with gr.Row(visible=False) as image_input_panel:
                 with gr.Tabs():
                     with gr.TabItem(label='Upscale or Variation') as uov_tab:
@@ -147,7 +141,7 @@ with shared.gradio_root:
                                            outputs=ip_ad_cols + ip_types + ip_stops + ip_weights, queue=False)
 
                     with gr.TabItem(label='Inpaint or Outpaint (beta)') as inpaint_tab:
-                        inpaint_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF", elem_id='inpaint_canvas')
+                        inpaint_input_image = grh.Image(label='Drag above image to here', source='upload', type='numpy', tool='sketch', height=500, brush_color="#FFFFFF")
                         gr.HTML('Outpaint Expansion (<a href="https://github.com/lllyasviel/Fooocus/discussions/414" target="_blank">\U0001F4D4 Document</a>):')
                         outpaint_selections = gr.CheckboxGroup(choices=['Left', 'Right', 'Top', 'Bottom'], value=[], label='Outpaint', show_label=False, container=False)
                         gr.HTML('* \"Inpaint or Outpaint\" is powered by the sampler \"DPMPP Fooocus Seamless 2M SDE Karras Inpaint Sampler\" (beta)')
@@ -185,32 +179,26 @@ with shared.gradio_root:
             inpaint_tab.select(lambda: ['inpaint', default_image], outputs=[current_tab, inpaint_input_image], queue=False, _js=down_js)
             ip_tab.select(lambda: 'ip', outputs=[current_tab], queue=False, _js=down_js)
 
-        with gr.Column(scale=1, visible=modules.path.default_advanced_checkbox) as advanced_column:
+        with gr.Column(scale=0.5, visible=False) as right_col:
             with gr.Tab(label='Setting'):
                 performance_selection = gr.Radio(label='Performance', choices=['Speed', 'Quality'], value='Speed')
-                aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=modules.path.available_aspect_ratios,
+                aspect_ratios_selection = gr.Radio(label='Aspect Ratios', choices=list(aspect_ratios.keys()),
                                                    value=modules.path.default_aspect_ratio, info='width × height')
-                image_number = gr.Slider(label='Image Number', minimum=1, maximum=32, step=1, value=modules.path.default_image_number)
+                image_number = gr.Slider(label='Image Number', minimum=1, maximum=32, step=1, value=2)
                 negative_prompt = gr.Textbox(label='Negative Prompt', show_label=True, placeholder="Type prompt here.",
                                              info='Describing what you do not want to see.', lines=2,
                                              value=modules.path.default_negative_prompt)
                 seed_random = gr.Checkbox(label='Random', value=True)
-                image_seed = gr.Textbox(label='Seed', value=0, max_lines=1, visible=False) # workaround for https://github.com/gradio-app/gradio/issues/5354
+                image_seed = gr.Number(label='Seed', value=0, precision=0, visible=False)
 
                 def random_checked(r):
                     return gr.update(visible=not r)
 
-                def refresh_seed(r, seed_string):
+                def refresh_seed(r, s):
                     if r:
-                        return random.randint(constants.MIN_SEED, constants.MAX_SEED)
+                        return random.randint(1, 1024*1024*1024)
                     else:
-                        try:
-                            seed_value = int(seed_string)
-                            if constants.MIN_SEED <= seed_value <= constants.MAX_SEED:
-                                return seed_value
-                        except ValueError:
-                            pass
-                        return random.randint(constants.MIN_SEED, constants.MAX_SEED)
+                        return s
 
                 seed_random.change(random_checked, inputs=[seed_random], outputs=[image_seed], queue=False)
 
@@ -291,7 +279,7 @@ with shared.gradio_root:
                                                      info='Version of Fooocus inpaint model')
 
                     with gr.Tab(label='Control Debug'):
-                        debugging_cn_preprocessor = gr.Checkbox(label='Debug Preprocessors', value=False)
+                        debugging_cn_preprocessor = gr.Checkbox(label='Debug Preprocessor of ControlNets', value=False)
 
                         mixing_image_prompt_and_vary_upscale = gr.Checkbox(label='Mixing Image Prompt and Vary/Upscale',
                                                                            value=False)
@@ -302,10 +290,10 @@ with shared.gradio_root:
                                                         step=0.001, value=0.25,
                                                         info='Similar to the Control Mode in A1111 (use 0.0 to disable). ')
 
-                        with gr.Tab(label='Canny'):
-                            canny_low_threshold = gr.Slider(label='Canny Low Threshold', minimum=1, maximum=255,
+                        with gr.Tab(label='PyramidCanny'):
+                            canny_low_threshold = gr.Slider(label='PyramidCanny Low Threshold', minimum=1, maximum=255,
                                                             step=1, value=64)
-                            canny_high_threshold = gr.Slider(label='Canny High Threshold', minimum=1, maximum=255,
+                            canny_high_threshold = gr.Slider(label='PyramidCanny High Threshold', minimum=1, maximum=255,
                                                              step=1, value=128)
 
                     with gr.Tab(label='FreeU'):
@@ -340,7 +328,7 @@ with shared.gradio_root:
 
                 model_refresh.click(model_refresh_clicked, [], [base_model, refiner_model] + lora_ctrls, queue=False)
 
-        advanced_checkbox.change(lambda x: gr.update(visible=x), advanced_checkbox, advanced_column, queue=False)
+        advanced_checkbox.change(lambda x: gr.update(visible=x), advanced_checkbox, right_col, queue=False)
 
         ctrls = [
             prompt, negative_prompt, style_selections,
@@ -366,18 +354,9 @@ with shared.gradio_root:
                 break
 
 
-def dump_default_english_config():
-    from modules.localization import dump_english_config
-    dump_english_config(grh.all_components)
-
-
-# dump_default_english_config()
-
 shared.gradio_root.launch(
     inbrowser=args_manager.args.auto_launch,
     server_name=args_manager.args.listen,
     server_port=args_manager.args.port,
-    share=args_manager.args.share,
-    auth=check_auth if args_manager.args.share and auth_enabled else None,
-    blocked_paths=[constants.AUTH_FILENAME]
+    share=args_manager.args.share
 )

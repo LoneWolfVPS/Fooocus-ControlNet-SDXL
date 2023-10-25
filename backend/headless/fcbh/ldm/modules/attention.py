@@ -95,19 +95,9 @@ def Normalize(in_channels, dtype=None, device=None):
     return torch.nn.GroupNorm(num_groups=32, num_channels=in_channels, eps=1e-6, affine=True, dtype=dtype, device=device)
 
 def attention_basic(q, k, v, heads, mask=None):
-    b, _, dim_head = q.shape
-    dim_head //= heads
-    scale = dim_head ** -0.5
-
     h = heads
-    q, k, v = map(
-        lambda t: t.unsqueeze(3)
-        .reshape(b, -1, heads, dim_head)
-        .permute(0, 2, 1, 3)
-        .reshape(b * heads, -1, dim_head)
-        .contiguous(),
-        (q, k, v),
-    )
+    scale = (q.shape[-1] // heads) ** -0.5
+    q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> (b h) n d', h=h), (q, k, v))
 
     # force cast to fp32 to avoid overflowing
     if _ATTN_PRECISION =="fp32":
@@ -129,24 +119,16 @@ def attention_basic(q, k, v, heads, mask=None):
     sim = sim.softmax(dim=-1)
 
     out = einsum('b i j, b j d -> b i d', sim.to(v.dtype), v)
-    out = (
-        out.unsqueeze(0)
-        .reshape(b, heads, -1, dim_head)
-        .permute(0, 2, 1, 3)
-        .reshape(b, -1, heads * dim_head)
-    )
+    out = rearrange(out, '(b h) n d -> b n (h d)', h=h)
     return out
 
 
 def attention_sub_quad(query, key, value, heads, mask=None):
-    b, _, dim_head = query.shape
-    dim_head //= heads
-
-    scale = dim_head ** -0.5
-    query = query.unsqueeze(3).reshape(b, -1, heads, dim_head).permute(0, 2, 1, 3).reshape(b * heads, -1, dim_head)
-    value = value.unsqueeze(3).reshape(b, -1, heads, dim_head).permute(0, 2, 1, 3).reshape(b * heads, -1, dim_head)
-
-    key = key.unsqueeze(3).reshape(b, -1, heads, dim_head).permute(0, 2, 3, 1).reshape(b * heads, dim_head, -1)
+    scale = (query.shape[-1] // heads) ** -0.5
+    query = query.unflatten(-1, (heads, -1)).transpose(1,2).flatten(end_dim=1)
+    key_t = key.transpose(1,2).unflatten(1, (heads, -1)).flatten(end_dim=1)
+    del key
+    value = value.unflatten(-1, (heads, -1)).transpose(1,2).flatten(end_dim=1)
 
     dtype = query.dtype
     upcast_attention = _ATTN_PRECISION =="fp32" and query.dtype != torch.float32
@@ -155,7 +137,7 @@ def attention_sub_quad(query, key, value, heads, mask=None):
     else:
         bytes_per_token = torch.finfo(query.dtype).bits//8
     batch_x_heads, q_tokens, _ = query.shape
-    _, _, k_tokens = key.shape
+    _, _, k_tokens = key_t.shape
     qk_matmul_size_bytes = batch_x_heads * bytes_per_token * q_tokens * k_tokens
 
     mem_free_total, mem_free_torch = model_management.get_free_memory(query.device, True)
@@ -189,7 +171,7 @@ def attention_sub_quad(query, key, value, heads, mask=None):
 
     hidden_states = efficient_dot_product_attention(
         query,
-        key,
+        key_t,
         value,
         query_chunk_size=query_chunk_size,
         kv_chunk_size=kv_chunk_size,
@@ -204,19 +186,9 @@ def attention_sub_quad(query, key, value, heads, mask=None):
     return hidden_states
 
 def attention_split(q, k, v, heads, mask=None):
-    b, _, dim_head = q.shape
-    dim_head //= heads
-    scale = dim_head ** -0.5
-
+    scale = (q.shape[-1] // heads) ** -0.5
     h = heads
-    q, k, v = map(
-        lambda t: t.unsqueeze(3)
-        .reshape(b, -1, heads, dim_head)
-        .permute(0, 2, 1, 3)
-        .reshape(b * heads, -1, dim_head)
-        .contiguous(),
-        (q, k, v),
-    )
+    q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> (b h) n d', h=h), (q, k, v))
 
     r1 = torch.zeros(q.shape[0], q.shape[1], v.shape[2], device=q.device, dtype=q.dtype)
 
@@ -276,23 +248,17 @@ def attention_split(q, k, v, heads, mask=None):
 
     del q, k, v
 
-    r1 = (
-        r1.unsqueeze(0)
-        .reshape(b, heads, -1, dim_head)
-        .permute(0, 2, 1, 3)
-        .reshape(b, -1, heads * dim_head)
-    )
-    return r1
+    r2 = rearrange(r1, '(b h) n d -> b n (h d)', h=h)
+    del r1
+    return r2
 
 def attention_xformers(q, k, v, heads, mask=None):
-    b, _, dim_head = q.shape
-    dim_head //= heads
-
+    b, _, _ = q.shape
     q, k, v = map(
         lambda t: t.unsqueeze(3)
-        .reshape(b, -1, heads, dim_head)
+        .reshape(b, t.shape[1], heads, -1)
         .permute(0, 2, 1, 3)
-        .reshape(b * heads, -1, dim_head)
+        .reshape(b * heads, t.shape[1], -1)
         .contiguous(),
         (q, k, v),
     )
@@ -304,9 +270,9 @@ def attention_xformers(q, k, v, heads, mask=None):
         raise NotImplementedError
     out = (
         out.unsqueeze(0)
-        .reshape(b, heads, -1, dim_head)
+        .reshape(b, heads, out.shape[1], -1)
         .permute(0, 2, 1, 3)
-        .reshape(b, -1, heads * dim_head)
+        .reshape(b, out.shape[1], -1)
     )
     return out
 

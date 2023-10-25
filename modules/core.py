@@ -1,7 +1,8 @@
+import pathlib
+
 from modules.patch import patch_all
 
 patch_all()
-
 
 import os
 import einops
@@ -18,20 +19,21 @@ import fcbh.samplers
 import fcbh.latent_formats
 
 from fcbh.sd import load_checkpoint_guess_config
-from nodes import VAEDecode, EmptyLatentImage, VAEEncode, VAEEncodeTiled, VAEDecodeTiled, \
+from nodes import VAEDecode, EmptyLatentImage, VAEEncode, VAEEncodeTiled, VAEDecodeTiled, VAEEncodeForInpaint, \
     ControlNetApplyAdvanced
 from fcbh_extras.nodes_freelunch import FreeU_V2
 from fcbh.sample import prepare_mask
 from modules.patch import patched_sampler_cfg_function, patched_model_function_wrapper
 from fcbh.lora import model_lora_keys_unet, model_lora_keys_clip, load_lora
 from modules.path import embeddings_path
-
+# from fooocus_extras.zoe import ZoeDetector
 
 opEmptyLatentImage = EmptyLatentImage()
 opVAEDecode = VAEDecode()
 opVAEEncode = VAEEncode()
 opVAEDecodeTiled = VAEDecodeTiled()
 opVAEEncodeTiled = VAEEncodeTiled()
+opVAEEncodeForInpaint = VAEEncodeForInpaint()
 opControlNetApplyAdvanced = ControlNetApplyAdvanced()
 opFreeU = FreeU_V2()
 
@@ -56,11 +58,29 @@ def load_controlnet(ckpt_filename):
     return fcbh.controlnet.load_controlnet(ckpt_filename)
 
 
+# @torch.no_grad()
+# @torch.inference_mode()
+# def load_controlnet_preprocess(path,loader):
+#     loaders = {
+#         'ZoeDetector': ZoeDetector,
+#         'PoseBody': 'PoseBody',
+#         'PoseFace': 'PoseFace',
+#         'PoseHand': 'PoseHand',
+#     }
+#     file_name = pathlib.Path(path).stem
+#     if file_name not in loaders:
+#         raise Exception(f"Unsupported model {file_name}")
+#     loader = loaders[file_name]
+#     model = loader(path)
+#     return model
+
+
 @torch.no_grad()
 @torch.inference_mode()
 def apply_controlnet(positive, negative, control_net, image, strength, start_percent, end_percent):
     return opControlNetApplyAdvanced.apply_controlnet(positive=positive, negative=negative, control_net=control_net,
-        image=image, strength=strength, start_percent=start_percent, end_percent=end_percent)
+                                                      image=image, strength=strength, start_percent=start_percent,
+                                                      end_percent=end_percent)
 
 
 @torch.no_grad()
@@ -129,21 +149,7 @@ def encode_vae(vae, pixels, tiled=False):
 @torch.no_grad()
 @torch.inference_mode()
 def encode_vae_inpaint(vae, pixels, mask):
-    assert mask.ndim == 3 and pixels.ndim == 4
-    assert mask.shape[-1] == pixels.shape[-2]
-    assert mask.shape[-2] == pixels.shape[-3]
-
-    w = mask.round()[..., None]
-    pixels = pixels * (1 - w) + 0.5 * w
-
-    latent = vae.encode(pixels)
-    B, C, H, W = latent.shape
-
-    latent_mask = mask[:, None, :, :]
-    latent_mask = torch.nn.functional.interpolate(latent_mask, size=(H * 8, W * 8), mode="bilinear").round()
-    latent_mask = torch.nn.functional.max_pool2d(latent_mask, (8, 8)).round()
-
-    return latent, latent_mask
+    return opVAEEncodeForInpaint.encode(pixels=pixels, vae=vae, mask=mask)[0]
 
 
 class VAEApprox(torch.nn.Module):
@@ -218,21 +224,18 @@ def get_previewer(model):
 def ksampler(model, positive, negative, latent, seed=None, steps=30, cfg=7.0, sampler_name='dpmpp_2m_sde_gpu',
              scheduler='karras', denoise=1.0, disable_noise=False, start_step=None, last_step=None,
              force_full_denoise=False, callback_function=None, refiner=None, refiner_switch=-1,
-             previewer_start=None, previewer_end=None, sigmas=None, noise_mean=None):
-
+             previewer_start=None, previewer_end=None, sigmas=None, noise=None):
     if sigmas is not None:
         sigmas = sigmas.clone().to(fcbh.model_management.get_torch_device())
 
     latent_image = latent["samples"]
 
-    if disable_noise:
-        noise = torch.zeros(latent_image.size(), dtype=latent_image.dtype, layout=latent_image.layout, device="cpu")
-    else:
-        batch_inds = latent["batch_index"] if "batch_index" in latent else None
-        noise = fcbh.sample.prepare_noise(latent_image, seed, batch_inds)
-
-    if isinstance(noise_mean, torch.Tensor):
-        noise = noise + noise_mean - torch.mean(noise, dim=1, keepdim=True)
+    if noise is None:
+        if disable_noise:
+            noise = torch.zeros(latent_image.size(), dtype=latent_image.dtype, layout=latent_image.layout, device="cpu")
+        else:
+            batch_inds = latent["batch_index"] if "batch_index" in latent else None
+            noise = fcbh.sample.prepare_noise(latent_image, seed, batch_inds)
 
     noise_mask = None
     if "noise_mask" in latent:
@@ -260,11 +263,12 @@ def ksampler(model, positive, negative, latent, seed=None, steps=30, cfg=7.0, sa
     fcbh.samplers.sample = modules.sample_hijack.sample_hacked
 
     try:
-        samples = fcbh.sample.sample(model, noise, steps, cfg, sampler_name, scheduler, positive, negative, latent_image,
-                                      denoise=denoise, disable_noise=disable_noise, start_step=start_step,
-                                      last_step=last_step,
-                                      force_full_denoise=force_full_denoise, noise_mask=noise_mask, callback=callback,
-                                      disable_pbar=disable_pbar, seed=seed, sigmas=sigmas)
+        samples = fcbh.sample.sample(model, noise, steps, cfg, sampler_name, scheduler, positive, negative,
+                                     latent_image,
+                                     denoise=denoise, disable_noise=disable_noise, start_step=start_step,
+                                     last_step=last_step,
+                                     force_full_denoise=force_full_denoise, noise_mask=noise_mask, callback=callback,
+                                     disable_pbar=disable_pbar, seed=seed, sigmas=sigmas)
 
         out = latent.copy()
         out["samples"] = samples

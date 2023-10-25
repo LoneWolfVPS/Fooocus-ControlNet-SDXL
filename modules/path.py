@@ -7,6 +7,16 @@ import modules.sdxl_styles
 from modules.model_loader import load_file_from_url
 from modules.util import get_files_from_folder
 
+from fooocus_extras.controlnet_preprocess_model.PyramidCanny import PyramidCanny
+from fooocus_extras.controlnet_preprocess_model.CPDS import CPDS
+from fooocus_extras.controlnet_preprocess_model.ZeoDepth import ZoeDetector
+from fooocus_extras.controlnet_preprocess_model.OpenPose import OpenPose
+from fooocus_extras.controlnet_preprocess_model.ReColor import ReColor
+from fooocus_extras.controlnet_preprocess_model.Sketch import Sketch
+from fooocus_extras.controlnet_preprocess_model.Revision import Revision
+from fooocus_extras.controlnet_preprocess_model.TileBlur import TileBlur
+from fooocus_extras.controlnet_preprocess_model.TileBlurAnime import TileBlurAnime
+
 config_path = "user_path_config.txt"
 config_dict = {}
 
@@ -54,7 +64,7 @@ embeddings_path = get_dir_or_set_default('embeddings_path', '../models/embedding
 vae_approx_path = get_dir_or_set_default('vae_approx_path', '../models/vae_approx/')
 upscale_models_path = get_dir_or_set_default('upscale_models_path', '../models/upscale_models/')
 inpaint_models_path = get_dir_or_set_default('inpaint_models_path', '../models/inpaint/')
-controlnet_models_path = get_dir_or_set_default('controlnet_models_path', '../models/controlnet/')
+controlnet_models_dir = get_dir_or_set_default('controlnet_models_path', '../models/controlnet/')
 clip_vision_models_path = get_dir_or_set_default('clip_vision_models_path', '../models/clip_vision/')
 fooocus_expansion_path = get_dir_or_set_default('fooocus_expansion_path',
                                                 '../models/prompt_expansion/fooocus_expansion')
@@ -121,8 +131,7 @@ default_styles = get_config_item_or_set_default(
 default_negative_prompt = get_config_item_or_set_default(
     key='default_negative_prompt',
     default_value='low quality, bad hands, bad eyes, cropped, missing fingers, extra digit',
-    validator=lambda x: isinstance(x, str),
-    disable_empty_as_none=True
+    validator=lambda x: isinstance(x, str)
 )
 default_positive_prompt = get_config_item_or_set_default(
     key='default_positive_prompt',
@@ -130,23 +139,13 @@ default_positive_prompt = get_config_item_or_set_default(
     validator=lambda x: isinstance(x, str),
     disable_empty_as_none=True
 )
-default_advanced_checkbox = get_config_item_or_set_default(
-    key='default_advanced_checkbox',
-    default_value=False,
-    validator=lambda x: isinstance(x, bool)
-)
-default_image_number = get_config_item_or_set_default(
-    key='default_image_number',
-    default_value=2,
-    validator=lambda x: isinstance(x, int) and x >= 1 and x <= 32
-)
 checkpoint_downloads = get_config_item_or_set_default(
     key='checkpoint_downloads',
     default_value={
         'sd_xl_base_1.0_0.9vae.safetensors':
             'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors',
         'sd_xl_refiner_1.0_0.9vae.safetensors':
-            'https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors'
+            'https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors',
     },
     validator=lambda x: isinstance(x, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in x.items())
 )
@@ -163,16 +162,11 @@ embeddings_downloads = get_config_item_or_set_default(
     default_value={},
     validator=lambda x: isinstance(x, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in x.items())
 )
-available_aspect_ratios = get_config_item_or_set_default(
-    key='available_aspect_ratios',
-    default_value=['704*1408', '704*1344', '768*1344', '768*1280', '832*1216', '832*1152', '896*1152', '896*1088', '960*1088', '960*1024', '1024*1024', '1024*960', '1088*960', '1088*896', '1152*896', '1152*832', '1216*832', '1280*768', '1344*768', '1344*704', '1408*704', '1472*704', '1536*640', '1600*640', '1664*576', '1728*576'],
-    validator=lambda x: isinstance(x, list) and all('*' in v for v in x) and len(x) > 1
-)
 default_aspect_ratio = get_config_item_or_set_default(
     key='default_aspect_ratio',
-    default_value='1152*896' if '1152*896' in available_aspect_ratios else available_aspect_ratios[0],
-    validator=lambda x: x in available_aspect_ratios
-)
+    default_value='1152*896',
+    validator=lambda x: x.replace('*', '×') in modules.sdxl_styles.aspect_ratios
+).replace('*', '×')
 
 if preset is None:
     # Do not overwrite user config if preset is applied.
@@ -183,9 +177,6 @@ os.makedirs(temp_outputs_path, exist_ok=True)
 
 model_filenames = []
 lora_filenames = []
-
-available_aspect_ratios = [x.replace('*', '×') for x in available_aspect_ratios]
-default_aspect_ratio = default_aspect_ratio.replace('*', '×')
 
 
 def get_model_filenames(folder_path, name_filter=None):
@@ -207,15 +198,6 @@ def downloading_inpaint_models(v):
         model_dir=inpaint_models_path,
         file_name='fooocus_inpaint_head.pth'
     )
-    head_file = os.path.join(inpaint_models_path, 'fooocus_inpaint_head.pth')
-    patch_file = None
-
-    # load_file_from_url(
-    #     url='https://huggingface.co/lllyasviel/Annotators/resolve/main/ControlNetLama.pth',
-    #     model_dir=inpaint_models_path,
-    #     file_name='ControlNetLama.pth'
-    # )
-    # lama_file = os.path.join(inpaint_models_path, 'ControlNetLama.pth')
 
     if v == 'v1':
         load_file_from_url(
@@ -223,7 +205,8 @@ def downloading_inpaint_models(v):
             model_dir=inpaint_models_path,
             file_name='inpaint.fooocus.patch'
         )
-        patch_file = os.path.join(inpaint_models_path, 'inpaint.fooocus.patch')
+        return os.path.join(inpaint_models_path, 'fooocus_inpaint_head.pth'), os.path.join(inpaint_models_path,
+                                                                                           'inpaint.fooocus.patch')
 
     if v == 'v2.5':
         load_file_from_url(
@@ -231,27 +214,335 @@ def downloading_inpaint_models(v):
             model_dir=inpaint_models_path,
             file_name='inpaint_v25.fooocus.patch'
         )
-        patch_file = os.path.join(inpaint_models_path, 'inpaint_v25.fooocus.patch')
-
-    return head_file, patch_file
-
-
-def downloading_controlnet_canny():
-    load_file_from_url(
-        url='https://huggingface.co/lllyasviel/misc/resolve/main/control-lora-canny-rank128.safetensors',
-        model_dir=controlnet_models_path,
-        file_name='control-lora-canny-rank128.safetensors'
-    )
-    return os.path.join(controlnet_models_path, 'control-lora-canny-rank128.safetensors')
+        return os.path.join(inpaint_models_path, 'fooocus_inpaint_head.pth'), os.path.join(inpaint_models_path,
+                                                                                           'inpaint_v25.fooocus.patch')
 
 
-def downloading_controlnet_cpds():
-    load_file_from_url(
-        url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_xl_cpds_128.safetensors',
-        model_dir=controlnet_models_path,
-        file_name='fooocus_xl_cpds_128.safetensors'
-    )
-    return os.path.join(controlnet_models_path, 'fooocus_xl_cpds_128.safetensors')
+def GET_PATH(m):
+    dir = m['dir']
+    file_name = m['file_name']
+    if dir is None or file_name is None:
+        return None
+    else:
+        return os.path.join(dir, file_name)
+
+
+CONTROLNET_MODELS = [
+    # ControlnetModels
+    {
+        'id': 0,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/stabilityai/control-lora/resolve/main/control-LoRAs-rank128/control-lora-depth-rank128.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'control-lora-depth-rank128.safetensors',
+        'loader': 'ControlNet',
+        'condition': "depth",
+        'preprocess': False,  # is preprocess model?
+        'default': True,  # default model?
+        'path': GET_PATH,
+    },
+    {
+        'id': 1,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/misc/resolve/main/control-lora-canny-rank128.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'control-lora-canny-rank128.safetensors',
+        'loader': 'ControlNet',
+        'condition': "canny",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 2,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/sd_control_collection/resolve/main/thibaud_xl_openpose_256lora.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'thibaud_xl_openpose_256lora.safetensors',
+        'loader': 'ControlNet',
+        'condition': "pose",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 3,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_xl_cpds_128.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'fooocus_xl_cpds_128.safetensors',
+        'loader': 'ControlNet',
+        'condition': "cpds",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 4,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/stabilityai/control-lora/resolve/main/control-LoRAs-rank128/control-lora-recolor-rank128.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'control-lora-recolor-rank128.safetensors',
+        'loader': 'ControlNet',
+        'condition': "recolor",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 5,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/stabilityai/control-lora/resolve/main/control-LoRAs-rank128/control-lora-sketch-rank128-metadata.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'control-lora-sketch-rank128-metadata.safetensors',
+        'loader': 'ControlNet',
+        'condition': "sketch",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 6,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/stabilityai/control-lora/resolve/main/revision/clip_vision_g.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'clip_vision_g.safetensors',
+        'loader': 'ControlNet',
+        'condition': "revision",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 7,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/sd_control_collection/resolve/main/kohya_controllllite_xl_blur.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'kohya_controllllite_xl_blur.safetensors',
+        'loader': 'ControlNet',
+        'condition': "tile_blur",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 8,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/sd_control_collection/resolve/main/kohya_controllllite_xl_blur_anime.safetensors'
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'kohya_controllllite_xl_blur_anime.safetensors',
+        'loader': 'ControlNet',
+        'condition': "tile_blur_anime",
+        'preprocess': False,
+        'default': True,
+        'path': GET_PATH,
+    },
+    # preprocessing
+    {
+        'id': 9,
+        'url': None,
+        'dir': None,
+        'file_name': 'ControlNetCannyPreprocess__pyramidCanny',
+        'loader': PyramidCanny,
+        'condition': "canny",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 10,
+        'url': None,
+        'dir': None,
+        'file_name': 'ControlNetCPDSPreprocess__cpds',
+        'loader': CPDS,
+        'condition': "cpds",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 11,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/Annotators/resolve/main/ZoeD_M12_N.pt',
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'ZoeD_M12_N.pt',
+        'loader': ZoeDetector,
+        'condition': "depth",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 12,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/Annotators/resolve/main/body_pose_model.pth',
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'body_pose_model.pth',
+        'loader': OpenPose,
+        'condition': "pose",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 13,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/Annotators/resolve/main/hand_pose_model.pth',
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'hand_pose_model.pth',
+        'loader': OpenPose,
+        'condition': "pose",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 14,
+        'url': {
+            'select': 0,
+            'providers': [
+                'https://huggingface.co/lllyasviel/Annotators/resolve/main/facenet.pth',
+            ]
+        },
+        'dir': controlnet_models_dir,
+        'file_name': 'facenet.pth',
+        'loader': OpenPose,
+        'condition': "pose",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 15,
+        'url': None,
+        'dir': controlnet_models_dir,
+        'file_name': 'ControlNetReColorPreprocess_reColor',
+        'loader': ReColor,
+        'condition': "recolor",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 16,
+        'url': None,
+        'dir': controlnet_models_dir,
+        'file_name': 'ControlNetSketchPreprocess_sketch',
+        'loader': Sketch,
+        'condition': "sketch",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 17,
+        'url': None,
+        'dir': controlnet_models_dir,
+        'file_name': 'ControlNetRevisionPreprocess_revision',
+        'loader': Revision,
+        'condition': "revision",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 18,
+        'url': None,
+        'dir': controlnet_models_dir,
+        'file_name': 'ControlNetTileBlurPreprocess_tileBlur',
+        'loader': TileBlur,
+        'condition': "tile_blur",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+    {
+        'id': 19,
+        'url': None,
+        'dir': controlnet_models_dir,
+        'file_name': 'ControlNetTileBlurAnimePreprocess_tileBlurAnime',
+        'loader': TileBlurAnime,
+        'condition': "tile_blur_anime",
+        'preprocess': True,
+        'default': True,
+        'path': GET_PATH,
+    },
+
+]
+
+
+def downloading_controlnet_models(condition):
+    def download(m):
+        url = m['url']
+        if m['default']:
+            if url is not None:
+                select = url['select']
+                providers = url['providers']
+                if not select < len(providers):
+                    raise ValueError(f"Invalid url select: {select} for {providers}")
+                load_file_from_url(
+                    url=providers[select],
+                    model_dir=m['dir'],
+                    file_name=m['file_name']
+                )
+        return m
+
+    if condition not in set([model['condition'] for model in CONTROLNET_MODELS]):
+        raise ValueError(f"Invalid condition: {condition}")
+    models = [download(m) for m in CONTROLNET_MODELS if m['condition'] == condition]
+    controlnet_models = [m for m in models if m['loader'] == 'ControlNet']
+    preprocess_models = [m for m in models if m['loader'] != 'ControlNet']
+    assert 1 == len(controlnet_models)
+    assert 1 <= len(preprocess_models)
+    return models
 
 
 def downloading_ip_adapters():
@@ -266,17 +557,17 @@ def downloading_ip_adapters():
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/fooocus_ip_negative.safetensors',
-        model_dir=controlnet_models_path,
+        model_dir=controlnet_models_dir,
         file_name='fooocus_ip_negative.safetensors'
     )
-    results += [os.path.join(controlnet_models_path, 'fooocus_ip_negative.safetensors')]
+    results += [os.path.join(controlnet_models_dir, 'fooocus_ip_negative.safetensors')]
 
     load_file_from_url(
         url='https://huggingface.co/lllyasviel/misc/resolve/main/ip-adapter-plus_sdxl_vit-h.bin',
-        model_dir=controlnet_models_path,
+        model_dir=controlnet_models_dir,
         file_name='ip-adapter-plus_sdxl_vit-h.bin'
     )
-    results += [os.path.join(controlnet_models_path, 'ip-adapter-plus_sdxl_vit-h.bin')]
+    results += [os.path.join(controlnet_models_dir, 'ip-adapter-plus_sdxl_vit-h.bin')]
 
     return results
 
@@ -291,3 +582,39 @@ def downloading_upscale_model():
 
 
 update_all_model_names()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

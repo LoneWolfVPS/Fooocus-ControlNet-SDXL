@@ -69,7 +69,7 @@ vae_approx_filename = os.path.join(vae_approx_path, 'xl-to-v1_interposer-v3.1.sa
 def parse(x):
     global vae_approx_model
 
-    x_origin = x.clone()
+    x_origin = x['samples'].clone()
 
     if vae_approx_model is None:
         model = Interposer()
@@ -89,5 +89,6 @@ def parse(x):
     fcbh.model_management.load_model_gpu(vae_approx_model)
 
     x = x_origin.to(device=vae_approx_model.load_device, dtype=vae_approx_model.dtype)
-    x = vae_approx_model.model(x).to(x_origin)
-    return x
+    x = vae_approx_model.model(x)
+
+    return {'samples': x.to(x_origin)}

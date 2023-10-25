@@ -11,6 +11,8 @@ psutil==5.9.5
 numpy==1.23.5
 pytorch_lightning==1.9.4
 omegaconf==2.2.3
-gradio==3.41.2
+gradio==3.39.0
 pygit2==1.12.2
 opencv-contrib-python==4.8.0.74
+timm==0.6.12
+scikit-image==0.22.0

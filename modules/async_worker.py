@@ -1,5 +1,6 @@
+import os.path
+import pathlib
 import threading
-
 
 buffer = []
 outputs = []
@@ -23,15 +24,14 @@ def worker():
     import fcbh.model_management
     import fooocus_extras.preprocessors as preprocessors
     import modules.inpaint_worker as inpaint_worker
-    import modules.constants as constants
     import modules.advanced_parameters as advanced_parameters
     import fooocus_extras.ip_adapter as ip_adapter
 
-    from modules.sdxl_styles import apply_style, apply_wildcards, fooocus_expansion
+    from modules.sdxl_styles import apply_style, apply_wildcards, aspect_ratios, fooocus_expansion
     from modules.private_logger import log
     from modules.expansion import safe_str
-    from modules.util import join_prompts, remove_empty_str, HWC3, resize_image, \
-        get_image_shape_ceil, set_image_shape_ceil, get_shape_ceil
+    from modules.util import join_prompts, remove_empty_str, HWC3, resize_image, image_is_generated_in_current_ui, \
+        make_sure_that_image_is_not_too_large
     from modules.upscaler import perform_upscale
 
     try:
@@ -73,7 +73,19 @@ def worker():
         outpaint_selections = args.pop()
         inpaint_input_image = args.pop()
 
-        cn_tasks = {flags.cn_ip: [], flags.cn_canny: [], flags.cn_cpds: []}
+
+        cn_tasks = {
+            flags.cn_ip: [],
+            flags.cn_canny: [],
+            flags.cn_cpds: [],
+            flags.cn_depth: [],
+            flags.cn_pose: [],
+            flags.cn_reColor: [],
+            flags.cn_Sketch: [],
+            # flags.cn_revision: [],
+            # flags.cn_tileBlur: [],
+            # flags.cn_tileBlurAnime: [],
+        }
         for _ in range(4):
             cn_img = args.pop()
             cn_stop = args.pop()
@@ -104,7 +116,8 @@ def worker():
         modules.patch.positive_adm_scale = advanced_parameters.adm_scaler_positive
         modules.patch.negative_adm_scale = advanced_parameters.adm_scaler_negative
         modules.patch.adm_scaler_end = advanced_parameters.adm_scaler_end
-        print(f'[Parameters] ADM Scale = {modules.patch.positive_adm_scale} : {modules.patch.negative_adm_scale} : {modules.patch.adm_scaler_end}')
+        print(
+            f'[Parameters] ADM Scale = {modules.patch.positive_adm_scale} : {modules.patch.negative_adm_scale} : {modules.patch.adm_scaler_end}')
 
         cfg_scale = float(guidance_scale)
         print(f'[Parameters] CFG = {cfg_scale}')
@@ -113,22 +126,34 @@ def worker():
         denoising_strength = 1.0
         tiled = False
         inpaint_worker.current_task = None
-
-        width, height = aspect_ratios_selection.split('×')
-        width, height = int(width), int(height)
-
+        width, height = aspect_ratios[aspect_ratios_selection]
         skip_prompt_processing = False
         refiner_swap_method = advanced_parameters.refiner_swap_method
+
+        raw_prompt = prompt
+        raw_negative_prompt = negative_prompt
 
         inpaint_image = None
         inpaint_mask = None
         inpaint_head_model_path = None
-        controlnet_canny_path = None
-        controlnet_cpds_path = None
+        controlnet_canny_info = []
+        controlnet_cpds_info = []
+        controlnet_depth_info = []
+        controlnet_pose_info = []
+        controlnet_reColor_info = []
+        controlnet_Sketch_info = []
+        # controlnet_revision_info = []
+        # controlnet_tileBlur_info = []
+        # controlnet_tileBlurAnime_info = []
         clip_vision_path, ip_negative_path, ip_adapter_path = None, None, None
 
-        seed = int(image_seed)
-        print(f'[Parameters] Seed = {seed}')
+        seed = image_seed
+        max_seed = int(1024 * 1024 * 1024)
+        if not isinstance(seed, int):
+            seed = random.randint(1, max_seed)
+        if seed < 0:
+            seed = - seed
+        seed = seed % max_seed
 
         if performance_selection == 'Speed':
             steps = 30
@@ -144,7 +169,8 @@ def worker():
         tasks = []
 
         if input_image_checkbox:
-            if (current_tab == 'uov' or (current_tab == 'ip' and advanced_parameters.mixing_image_prompt_and_vary_upscale)) \
+            if (current_tab == 'uov' or (
+                    current_tab == 'ip' and advanced_parameters.mixing_image_prompt_and_vary_upscale)) \
                     and uov_method != flags.disabled and uov_input_image is not None:
                 uov_input_image = HWC3(uov_input_image)
                 if 'vary' in uov_method:
@@ -162,7 +188,8 @@ def worker():
                             switch = 24
                     progressbar(1, 'Downloading upscale models ...')
                     modules.path.downloading_upscale_model()
-            if (current_tab == 'inpaint' or (current_tab == 'ip' and advanced_parameters.mixing_image_prompt_and_inpaint))\
+            if (current_tab == 'inpaint' or (
+                    current_tab == 'ip' and advanced_parameters.mixing_image_prompt_and_inpaint)) \
                     and isinstance(inpaint_input_image, dict):
                 inpaint_image = inpaint_input_image['image']
                 inpaint_mask = inpaint_input_image['mask'][:, :, 0]
@@ -170,7 +197,8 @@ def worker():
                 if isinstance(inpaint_image, np.ndarray) and isinstance(inpaint_mask, np.ndarray) \
                         and (np.any(inpaint_mask > 127) or len(outpaint_selections) > 0):
                     progressbar(1, 'Downloading inpainter ...')
-                    inpaint_head_model_path, inpaint_patch_model_path = modules.path.downloading_inpaint_models(advanced_parameters.inpaint_engine)
+                    inpaint_head_model_path, inpaint_patch_model_path = modules.path.downloading_inpaint_models(
+                        advanced_parameters.inpaint_engine)
                     loras += [(inpaint_patch_model_path, 1.0)]
                     print(f'[Inpaint] Current inpaint model is {inpaint_patch_model_path}')
                     goals.append('inpaint')
@@ -180,16 +208,43 @@ def worker():
                     advanced_parameters.mixing_image_prompt_and_vary_upscale:
                 goals.append('cn')
                 progressbar(1, 'Downloading control models ...')
+
                 if len(cn_tasks[flags.cn_canny]) > 0:
-                    controlnet_canny_path = modules.path.downloading_controlnet_canny()
+                    controlnet_canny_info = modules.path.downloading_controlnet_models('canny')
                 if len(cn_tasks[flags.cn_cpds]) > 0:
-                    controlnet_cpds_path = modules.path.downloading_controlnet_cpds()
+                    controlnet_cpds_info = modules.path.downloading_controlnet_models('cpds')
+                if len(cn_tasks[flags.cn_depth]) > 0:
+                    controlnet_depth_info = modules.path.downloading_controlnet_models('depth')
+                if len(cn_tasks[flags.cn_pose]) > 0:
+                    controlnet_pose_info = modules.path.downloading_controlnet_models('pose')
+                if len(cn_tasks[flags.cn_reColor]) > 0:
+                    controlnet_reColor_info = modules.path.downloading_controlnet_models('recolor')
+                if len(cn_tasks[flags.cn_Sketch]) > 0:
+                    controlnet_Sketch_info = modules.path.downloading_controlnet_models('sketch')
+                # if len(cn_tasks[flags.cn_revision]) > 0:
+                #     controlnet_revision_info = modules.path.downloading_controlnet_models('revision')
+                # if len(cn_tasks[flags.cn_tileBlur]) > 0:
+                #     controlnet_tileBlur_info = modules.path.downloading_controlnet_models('tile_blur')
+                # if len(cn_tasks[flags.cn_tileBlurAnime]) > 0:
+                #     controlnet_tileBlurAnime_info = modules.path.downloading_controlnet_models('tile_blur_anime')
                 if len(cn_tasks[flags.cn_ip]) > 0:
                     clip_vision_path, ip_negative_path, ip_adapter_path = modules.path.downloading_ip_adapters()
+
                 progressbar(1, 'Loading control models ...')
 
         # Load or unload CNs
-        pipeline.refresh_controlnets([controlnet_canny_path, controlnet_cpds_path])
+
+        pipeline.refresh_controlnets(
+            controlnet_canny_info +
+            controlnet_cpds_info +
+            controlnet_depth_info +
+            controlnet_pose_info +
+            controlnet_reColor_info +
+            controlnet_Sketch_info
+            # controlnet_revision_info +
+            # controlnet_tileBlur_info +
+            # controlnet_tileBlurAnime_info
+        )
         ip_adapter.load_ip_adapter(clip_vision_path, ip_negative_path, ip_adapter_path)
 
         if advanced_parameters.overwrite_step > 0:
@@ -221,18 +276,17 @@ def worker():
             extra_negative_prompts = negative_prompts[1:] if len(negative_prompts) > 1 else []
 
             progressbar(3, 'Loading models ...')
-            pipeline.refresh_everything(refiner_model_name=refiner_model_name, base_model_name=base_model_name, loras=loras)
+            pipeline.refresh_everything(refiner_model_name=refiner_model_name, base_model_name=base_model_name,
+                                        loras=loras)
 
             progressbar(3, 'Processing prompts ...')
             tasks = []
             for i in range(image_number):
-                task_seed = (seed + i) % (constants.MAX_SEED + 1) # randint is inclusive, % is not
-                task_rng = random.Random(task_seed)  # may bind to inpaint noise in the future
-
-                task_prompt = apply_wildcards(prompt, task_rng)
-                task_negative_prompt = apply_wildcards(negative_prompt, task_rng)
-                task_extra_positive_prompts = [apply_wildcards(pmt, task_rng) for pmt in extra_positive_prompts]
-                task_extra_negative_prompts = [apply_wildcards(pmt, task_rng) for pmt in extra_negative_prompts]
+                task_seed = seed + i
+                task_prompt = apply_wildcards(prompt, task_seed)
+                task_negative_prompt = apply_wildcards(negative_prompt, task_seed)
+                task_extra_positive_prompts = [apply_wildcards(pmt, task_seed) for pmt in extra_positive_prompts]
+                task_extra_negative_prompts = [apply_wildcards(pmt, task_seed) for pmt in extra_negative_prompts]
 
                 positive_basic_workloads = []
                 negative_basic_workloads = []
@@ -256,16 +310,13 @@ def worker():
                 tasks.append(dict(
                     task_seed=task_seed,
                     task_prompt=task_prompt,
-                    task_negative_prompt=task_negative_prompt,
                     positive=positive_basic_workloads,
                     negative=negative_basic_workloads,
                     expansion='',
                     c=None,
                     uc=None,
                     positive_top_k=len(positive_basic_workloads),
-                    negative_top_k=len(negative_basic_workloads),
-                    log_positive_prompt='\n'.join([task_prompt] + task_extra_positive_prompts),
-                    log_negative_prompt='\n'.join([task_negative_prompt] + task_extra_negative_prompts),
+                    negative_top_k=len(negative_basic_workloads)
                 ))
 
             if use_expansion:
@@ -274,7 +325,8 @@ def worker():
                     expansion = pipeline.final_expansion(t['task_prompt'], t['task_seed'])
                     print(f'[Prompt Expansion] New suffix: {expansion}')
                     t['expansion'] = expansion
-                    t['positive'] = copy.deepcopy(t['positive']) + [join_prompts(t['task_prompt'], expansion)]  # Deep copy.
+                    t['positive'] = copy.deepcopy(t['positive']) + [
+                        join_prompts(t['task_prompt'], expansion)]  # Deep copy.
 
             for i, t in enumerate(tasks):
                 progressbar(7, f'Encoding positive #{i + 1} ...')
@@ -288,6 +340,11 @@ def worker():
             progressbar(13, 'Image processing ...')
 
         if 'vary' in goals:
+            if not image_is_generated_in_current_ui(uov_input_image, ui_width=width, ui_height=height):
+                uov_input_image = resize_image(uov_input_image, width=width, height=height)
+                print(f'Resolution corrected - users are uploading their own images.')
+            else:
+                print(f'Processing images generated by Fooocus.')
             if 'subtle' in uov_method:
                 denoising_strength = 0.5
             if 'strong' in uov_method:
@@ -295,16 +352,7 @@ def worker():
             if advanced_parameters.overwrite_vary_strength > 0:
                 denoising_strength = advanced_parameters.overwrite_vary_strength
 
-            shape_ceil = get_image_shape_ceil(uov_input_image)
-            if shape_ceil < 1024:
-                print(f'[Vary] Image is resized because it is too small.')
-                shape_ceil = 1024
-            elif shape_ceil > 2048:
-                print(f'[Vary] Image is resized because it is too big.')
-                shape_ceil = 2048
-
-            uov_input_image = set_image_shape_ceil(uov_input_image, shape_ceil)
-
+            uov_input_image = make_sure_that_image_is_not_too_large(uov_input_image)
             initial_pixels = core.numpy_to_pytorch(uov_input_image)
             progressbar(13, 'VAE encoding ...')
             initial_latent = core.encode_vae(vae=pipeline.final_vae, pixels=initial_pixels)
@@ -329,12 +377,18 @@ def worker():
             else:
                 f = 1.0
 
-            shape_ceil = get_shape_ceil(H * f, W * f)
-            if shape_ceil < 1024:
-                print(f'[Upscale] Image is resized because it is too small.')
-                shape_ceil = 1024
-            uov_input_image = set_image_shape_ceil(uov_input_image, shape_ceil)
-            image_is_super_large = shape_ceil > 2800
+            width_f = int(width * f)
+            height_f = int(height * f)
+
+            if image_is_generated_in_current_ui(uov_input_image, ui_width=width_f, ui_height=height_f):
+                uov_input_image = resize_image(uov_input_image, width=int(W * f), height=int(H * f))
+                print(f'Processing images generated by Fooocus.')
+            else:
+                uov_input_image = resize_image(uov_input_image, width=width_f, height=height_f)
+                print(f'Resolution corrected - users are uploading their own images.')
+
+            H, W, C = uov_input_image.shape
+            image_is_super_large = H * W > 2800 * 2800
 
             if 'fast' in uov_method:
                 direct_return = True
@@ -400,76 +454,101 @@ def worker():
 
             pipeline.final_unet.model.diffusion_model.in_inpaint = True
 
-            if advanced_parameters.debugging_cn_preprocessor:
-                outputs.append(['results', inpaint_worker.current_task.visualize_mask_processing()])
-                return
-
-            progressbar(13, 'VAE Inpaint encoding ...')
-
-            inpaint_pixel_fill = core.numpy_to_pytorch(inpaint_worker.current_task.interested_fill)
-            inpaint_pixel_image = core.numpy_to_pytorch(inpaint_worker.current_task.interested_image)
-            inpaint_pixel_mask = core.numpy_to_pytorch(inpaint_worker.current_task.interested_mask)
-
-            latent_inpaint, latent_mask = core.encode_vae_inpaint(
-                mask=inpaint_pixel_mask,
-                vae=pipeline.final_vae,
-                pixels=inpaint_pixel_image)
-
-            latent_swap = None
-            if pipeline.final_refiner_vae is not None:
-                progressbar(13, 'VAE Inpaint SD15 encoding ...')
-                latent_swap = core.encode_vae(
-                    vae=pipeline.final_refiner_vae,
-                    pixels=inpaint_pixel_fill)['samples']
+            # print(f'Inpaint task: {str((height, width))}')
+            # outputs.append(['results', inpaint_worker.current_task.visualize_mask_processing()])
+            # return
 
             progressbar(13, 'VAE encoding ...')
-            latent_fill = core.encode_vae(
-                vae=pipeline.final_vae,
-                pixels=inpaint_pixel_fill)['samples']
+            inpaint_pixels = core.numpy_to_pytorch(inpaint_worker.current_task.image_ready)
+            initial_latent = core.encode_vae(vae=pipeline.final_vae, pixels=inpaint_pixels)
+            inpaint_latent = initial_latent['samples']
+            B, C, H, W = inpaint_latent.shape
+            inpaint_mask = core.numpy_to_pytorch(inpaint_worker.current_task.mask_ready[None])
+            inpaint_mask = torch.nn.functional.avg_pool2d(inpaint_mask, (8, 8))
+            inpaint_mask = torch.nn.functional.interpolate(inpaint_mask, (H, W), mode='bilinear')
 
-            inpaint_worker.current_task.load_latent(latent_fill=latent_fill,
-                                                    latent_inpaint=latent_inpaint,
-                                                    latent_mask=latent_mask,
-                                                    latent_swap=latent_swap,
-                                                    inpaint_head_model_path=inpaint_head_model_path)
+            latent_after_swap = None
+            if pipeline.final_refiner_vae is not None:
+                progressbar(13, 'VAE SD15 encoding ...')
+                latent_after_swap = core.encode_vae(vae=pipeline.final_refiner_vae, pixels=inpaint_pixels)['samples']
 
-            B, C, H, W = latent_fill.shape
+            inpaint_worker.current_task.load_latent(latent=inpaint_latent, mask=inpaint_mask,
+                                                    latent_after_swap=latent_after_swap)
+
+            progressbar(13, 'VAE inpaint encoding ...')
+
+            inpaint_mask = (inpaint_worker.current_task.mask_ready > 0).astype(np.float32)
+            inpaint_mask = torch.tensor(inpaint_mask).float()
+
+            vae_dict = core.encode_vae_inpaint(
+                mask=inpaint_mask, vae=pipeline.final_vae, pixels=inpaint_pixels)
+
+            inpaint_latent = vae_dict['samples']
+            inpaint_mask = vae_dict['noise_mask']
+            inpaint_worker.current_task.load_inpaint_guidance(latent=inpaint_latent, mask=inpaint_mask,
+                                                              model_path=inpaint_head_model_path)
+
+            B, C, H, W = inpaint_latent.shape
+            final_height, final_width = inpaint_worker.current_task.image_raw.shape[:2]
             height, width = H * 8, W * 8
-            final_height, final_width = inpaint_worker.current_task.image.shape[:2]
-            initial_latent = {'samples': latent_fill}
             print(f'Final resolution is {str((final_height, final_width))}, latent is {str((height, width))}.')
 
         if 'cn' in goals:
+            def get_controlnet_preprocess(info):
+                def get_paths(ms):
+                    ms = sorted(ms, key=lambda x: x['id'])
+                    paths = [
+                        {
+                            m['file_name']: m['path'](m) if m['path'](m) is not None else m['file_name']
+                        } for m in ms
+                    ]
+                    return paths
+
+                def get_1st_path(paths):
+                    return list(paths[0].values())[0]
+
+                ms = [m for m in info if m['preprocess']]
+                path = get_1st_path(get_paths(ms))
+                return pipeline.loaded_ControlNets[path]
+
+            def apply_controlnet_preprocess(task, preprocess_model):
+                cn_img, cn_stop, cn_weight = task
+                cn_img = resize_image(HWC3(cn_img), width=width, height=height)
+                cn_img = preprocess_model(cn_img)
+                cn_img = HWC3(cn_img)
+                task[0] = core.numpy_to_pytorch(cn_img)
+                if advanced_parameters.debugging_cn_preprocessor:
+                    outputs.append(['results', [cn_img]])
+                    return
+
+
             for task in cn_tasks[flags.cn_canny]:
-                cn_img, cn_stop, cn_weight = task
-                cn_img = resize_image(HWC3(cn_img), width=width, height=height)
-                cn_img = preprocessors.canny_pyramid(cn_img)
-                cn_img = HWC3(cn_img)
-                task[0] = core.numpy_to_pytorch(cn_img)
-                if advanced_parameters.debugging_cn_preprocessor:
-                    outputs.append(['results', [cn_img]])
-                    return
+                apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_canny_info))
             for task in cn_tasks[flags.cn_cpds]:
-                cn_img, cn_stop, cn_weight = task
-                cn_img = resize_image(HWC3(cn_img), width=width, height=height)
-                cn_img = preprocessors.cpds(cn_img)
-                cn_img = HWC3(cn_img)
-                task[0] = core.numpy_to_pytorch(cn_img)
-                if advanced_parameters.debugging_cn_preprocessor:
-                    outputs.append(['results', [cn_img]])
-                    return
+                apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_cpds_info))
+            for task in cn_tasks[flags.cn_depth]:
+                apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_depth_info))
+            for task in cn_tasks[flags.cn_pose]:
+                apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_pose_info))
+            for task in cn_tasks[flags.cn_reColor]:
+                apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_reColor_info))
+            for task in cn_tasks[flags.cn_Sketch]:
+                apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_Sketch_info))
+            # for task in cn_tasks[flags.cn_revision]:
+            #     apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_revision_info))
+            # for task in cn_tasks[flags.cn_tileBlur]:
+            #     apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_tileBlur_info))
+            # for task in cn_tasks[flags.cn_tileBlurAnime]:
+            #     apply_controlnet_preprocess(task, get_controlnet_preprocess(controlnet_tileBlurAnime_info))
             for task in cn_tasks[flags.cn_ip]:
                 cn_img, cn_stop, cn_weight = task
                 cn_img = HWC3(cn_img)
-
                 # https://github.com/tencent-ailab/IP-Adapter/blob/d580c50a291566bbf9fc7ac0f760506607297e6d/README.md?plain=1#L75
                 cn_img = resize_image(cn_img, width=224, height=224, resize_mode=0)
-
                 task[0] = ip_adapter.preprocess(cn_img)
                 if advanced_parameters.debugging_cn_preprocessor:
                     outputs.append(['results', [cn_img]])
                     return
-
             if len(cn_tasks[flags.cn_ip]) > 0:
                 pipeline.final_unet = ip_adapter.patch_model(pipeline.final_unet, cn_tasks[flags.cn_ip])
 
@@ -505,14 +584,42 @@ def worker():
                 positive_cond, negative_cond = task['c'], task['uc']
 
                 if 'cn' in goals:
+
                     for cn_flag, cn_path in [
-                        (flags.cn_canny, controlnet_canny_path),
-                        (flags.cn_cpds, controlnet_cpds_path)
+                        (flags.cn_canny,
+                         [m['path'](m) for m in controlnet_canny_info if not m['preprocess']][
+                             0] if 0 < len(controlnet_canny_info) else None),
+                        (flags.cn_cpds,
+                         [m['path'](m) for m in controlnet_cpds_info if not m['preprocess']][
+                             0] if 0 < len(controlnet_cpds_info) else None),
+                        (flags.cn_depth,
+                         [m['path'](m) for m in controlnet_depth_info if not m['preprocess']][
+                             0] if 0 < len(controlnet_depth_info) else None),
+                        (flags.cn_pose,
+                         [m['path'](m) for m in controlnet_pose_info if not m['preprocess']][
+                             0] if 0 < len(controlnet_pose_info) else None),
+                        (flags.cn_reColor,
+                         [m['path'](m) for m in controlnet_reColor_info if not m['preprocess']][
+                             0] if 0 < len(controlnet_reColor_info) else None),
+                        (flags.cn_Sketch,
+                         [m['path'](m) for m in controlnet_Sketch_info if not m['preprocess']][
+                             0] if 0 < len(controlnet_Sketch_info) else None),
+                        # (flags.cn_revision,
+                        #  [m['path'](m) for m in controlnet_revision_info if not m['preprocess']][
+                        #      0] if 0 < len(controlnet_revision_info) else None),
+                        # (flags.cn_tileBlur,
+                        #  [m['path'](m) for m in controlnet_tileBlur_info if not m['preprocess']][
+                        #      0] if 0 < len(controlnet_tileBlur_info) else None),
+                        # (flags.cn_tileBlurAnime,
+                        #  [m['path'](m) for m in controlnet_tileBlurAnime_info if not m['preprocess']][
+                        #      0] if 0 < len(controlnet_tileBlurAnime_info) else None),
+
                     ]:
-                        for cn_img, cn_stop, cn_weight in cn_tasks[cn_flag]:
-                            positive_cond, negative_cond = core.apply_controlnet(
-                                positive_cond, negative_cond,
-                                pipeline.loaded_ControlNets[cn_path], cn_img, cn_weight, 0, cn_stop)
+                        if cn_path is not None:
+                            for cn_img, cn_stop, cn_weight in cn_tasks[cn_flag]:
+                                positive_cond, negative_cond = core.apply_controlnet(
+                                    positive_cond, negative_cond,
+                                    pipeline.loaded_ControlNets[cn_path], cn_img, cn_weight, 0, cn_stop)
 
                 imgs = pipeline.process_diffusion(
                     positive_cond=positive_cond,
@@ -539,8 +646,8 @@ def worker():
 
                 for x in imgs:
                     d = [
-                        ('Prompt', task['log_positive_prompt']),
-                        ('Negative Prompt', task['log_negative_prompt']),
+                        ('Prompt', raw_prompt),
+                        ('Negative Prompt', raw_negative_prompt),
                         ('Fooocus V2 Expansion', task['expansion']),
                         ('Styles', str(raw_style_selections)),
                         ('Performance', performance_selection),

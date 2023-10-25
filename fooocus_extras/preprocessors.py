@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import modules.advanced_parameters as advanced_parameters
+from fooocus_extras.controlnet_preprocess_model.ZeoDepth import ZoeDetector
 
 
 def centered_canny(x: np.ndarray):
@@ -52,10 +53,8 @@ def norm255(x, low=4, high=96):
     x /= v_max - v_min
 
     return x * 255.0
-
-
 def canny_pyramid(x):
-    # For some reasons, SAI's Control-lora Canny seems to be trained on canny maps with non-standard resolutions.
+    # For some reasons, SAI's Control-lora PyramidCanny seems to be trained on canny maps with non-standard resolutions.
     # Then we use pyramid to use all resolutions to avoid missing any structure in specific resolutions.
 
     color_canny = pyramid_canny_color(x)
@@ -80,3 +79,15 @@ def cpds(x):
     result = density + offset
 
     return norm255(result, low=4, high=96).clip(0, 255).astype(np.uint8)
+
+
+def depth(x, depth_model):
+    result = depth_model(x)
+    # return norm255(result, low=2, high=85).clip(0, 255).astype(np.uint8)
+    return result
+
+
+def pose(x, pose_model):
+
+    result = pose_model(x)
+    return result
