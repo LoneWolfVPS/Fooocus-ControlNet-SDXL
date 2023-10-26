@@ -1,8 +1,13 @@
 <div align="center">
 
+| Discord                                                                               | youtube |
+|---------------------------------------------------------------------------------------|---------|
+| [![Open In Colab](asset/discord-icon-svgrepo-com.svg)](https://discord.gg/evHG9KEcxE) |         |
+
 # 🔥🔥🔥Fooocus-Control🔥🔥🔥
 
 </div>
+
 
 ---
 
@@ -67,17 +72,17 @@ Fooocus-Control adds more control to the original Fooocus software.
 | [Soft Edges](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-soft-edge)          | 📍 todo                       |                     |
 | [Linear](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-lineart)                | 📍 todo                       |                     |
 | [Anime Linear](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-anime-lineart)    | 📍 todo                       |                     |
-| [Tile](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-tile)                     | 📍  todo                      |                     |
+| [Tile](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-tile)                     | 📍 todo                       |                     |
 | [relighing]()                                                                                        | 📍 todo                       |                     |
 | [newBackground]()                                                                                    | 📍 todo                       |                     |
 | etc                                                                                                  | 📍 todo                       |                     |
 
 ---
 
-### 💡 FooocusControl keeps it simple
+### 💡 Fooocus-Control keeps it simple
 
 - Fooocus is an excellent SDXL-based software, which provides excellent generation effects based on the simplicity of
-  liking midjourney, while being free as stable diffusiond.
+  liking midjourney, while being free as stable diffusion.
 - FooocusControl inherits the core design concepts of fooocus, in order to minimize the learning threshold,
   FooocusControl has the same UI interface as fooocus (only in the Input Image/Image Prompt/advance to add more
   options).
@@ -85,23 +90,23 @@ Fooocus-Control adds more control to the original Fooocus software.
   image preprocessing, etc. Users don't need to bother with any of this at all, you just need to check the desired image
   control method.
 
-### 💡 FooocusControl facilitates secondary development
+### 💡 Fooocus-Control facilitates secondary development
 
-- FooocusControl simplifies the way fooocus integrates with controlnet by simply defining pre-processing and adding
+- Fooocus-Control simplifies the way fooocus integrates with controlnet by simply defining pre-processing and adding
   configuration files.
-- If you are a developer with your own unique controlnet model , with FooocusControl , you can easily integrate it into
+- If you are a developer with your own unique controlnet model , with Fooocus-Control , you can easily integrate it into
   fooocus .
 - In addition to controlnet, FooocusControl plans to continue to integrate ip-adapter and other models to further
   provide users with more control methods.
 
-### 💡 FooocusControl pursues the out-of-the-box use of software
+### 💡 Fooocus-Control pursues the 📍out-of-the-box use of software📍
 
-- Free software usually encounters a lot of installation and use of the problem, such as network problems caused by the
-  model file that can not be downloaded and updated, a variety of headaches gpu driver, plug-ins lack of dependent
-  libraries and other issues. These are very annoying invisible thresholds. fooocusControl is committed to solving these
+- Free software usually encounters a lot of installation and use of the problem, such as 😞 network problems caused by the
+  model file that can not be downloaded and updated 😞, 😞a variety of headaches gpu driver😞, 😞plug-ins lack of dependent
+  libraries and other issues😞. These are very annoying invisible thresholds. fooocusControl is committed to solving these
   problems.
 - FooocusControl has no external dependencies, all the dependencies are built into the software.
-- FooocusControl provides both light and massive download methods, the latter will download all the models built into
+- FooocusControl provides both online(light) and offline(massive) download methods, the offline(massive) version will download all the models built into
   the software, which is very friendly to users who need to run offline, or those who have a bad network.
 - Outside the windows platform, FooocusControl will try to use docker and other technologies to further simplify the
   user installation, to avoid various gpu and dependency problems to the greatest extent possible.
@@ -111,13 +116,17 @@ Fooocus-Control adds more control to the original Fooocus software.
 ### 💡 中国用户友好
 
 - FooocusControl将会针对每一个模型添加多个下载源(即将上线)，防止因网络问题导致模型无法下载或者更新..
-- windows平台上Massive下载方式基本避免网络问题
+- windows平台上offline下载方式基本避免网络问题
 - 中文翻译(即将上线)
-- 码云镜像(https://gitee.com/fenneishi/Fooocus-Control)
+- 代码码云镜像(https://gitee.com/fenneishi/Fooocus-Control)
 
 ---
 
-# [ Free Install Fooocus-Control](#Install)
+# [🔖Show Case](#show case)
+
+# [🔖Free Install Fooocus-Control](#install)
+
+---
 
 # <center>🍇show case🍇</center>
 
@@ -160,29 +169,58 @@ Fooocus-Control adds more control to the original Fooocus software.
 
 ---
 
-# Install
+# <center>🍇install🍇</center>
+
+# install
 
 ---
 
 ### Windows
 
-You can directly download Fooocus-Control with:
+<details>
+<summary>Click here to the see</summary>
 
-| version                                 | Description                                                                                            | Suitable For                                                                 | download                                                                                                                   |
-|-----------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| <span style="color:green;">Light</span> | update automatically, download model automatically <span style="color:green;">when needed</span>       | for users with a <span style="color:green;">good </span> internet connection | [>>> Click here to download <<<](https://huggingface.co/IiroHabib/FooocusControl/blob/main/FooocusControl_win64_2-1-7.zip) |
-| <span style="color:red;">Massive</span> | without update, <span style="color:red;">pre-download all models</span>  with the installation package | for users with a <span style="color:red;">bad </span> internet connection    | coming soon                                                                                                                |
+1. download the software
 
-After you download the file, please uncompress it, and then run the "run.bat"(or "run_anime.bat" or "run_realistic.bat")
-file.
+| version                                    | Description                                                                                            | Suitable For                                                                 | download(Unzip Password:ddert657)                                                                                                           |
+|--------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| <span style="color:green;"> online </span> | update automatically, download model automatically <span style="color:green;">when needed</span>       | for users with a <span style="color:green;">good </span> internet connection | [>>> Click here to download from huggingface <<<](https://huggingface.co/IiroHabib/FooocusControl/blob/main/FooocusControl_win64_2-1-7.zip) |
+|                                            |                                                                                                        |                                                                              | [>>> Click here to download from BaiduNetDisk <<<](https://pan.baidu.com/share/init?surl=8yMkH0bY8RgkeJWjT7WrEw&pwd=7wyd)                   |
+| <span style="color:red;"> offline </span>  | without update, <span style="color:red;">pre-download all models</span>  with the installation package | for users with a <span style="color:red;">bad </span> internet connection    | [>>> Click here to download from huggingface <<<]：coming soon(Uploading to Hugging Face always fails😞)                                     |
+|                                            |                                                                                                        |                                                                              | [>>> Click here to download from BaiduNetDisk <<<](https://pan.baidu.com/s/173m6TWu8KZzijVCIO7VMuQ?pwd=1qsd)                                |
 
-![image](https://github.com/lllyasviel/Fooocus/assets/19834515/c49269c4-c274-4893-b368-047c401cc58c)
+2. unzip the file(Unzip Password:ddert657)
 
-In the first time you launch the software, it will automatically download models(for <span style="color:green;">Light
-Version</span>):
+3. click run.bat to run the software
+   ![image](asset/run_bat.png)
 
-1. It will
-   download [sd_xl_base_1.0_0.9vae.safetensors from here](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors)
+4. Having fun
+
+##### Q&A
+
+<details>
+<summary>Q: Do I need to download the original fooocus software?</summary>
+No, you don't need to. Fooocus-Control is a standalone software, not a fooocus plugin. 
+Like most other software in the world, all you need to do is download (and unzip) -> launch it, there's nothing else required.
+</details>
+
+<details>
+<summary> Q: What is 'run_anime.bat' used for?</summary>
+'run.bat' will enable the generic version of Fooocus-Control, while 'run_anime.bat' will start the animated version of Fooocus-Control. 
+The animated version of Fooocus-Control doesn't have any magical spells inside; 
+it simply changes some default configurations from the generic version. 
+You can try launching both the generic and animated versions separately to see if there are any differences in the user interface.
+</details>
+
+<details>
+<summary>Q: What is 'run_realistic.bat' used for?</summary>
+Realistic version of Fooocus-Control
+</details>
+
+<details>
+<summary>Q: How to speed up ?</summary>
+In the first time you launch the software, it will automatically download models(only for <span style="color:green;">online Version</span>):
+1. It will download [sd_xl_base_1.0_0.9vae.safetensors from here](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0_0.9vae.safetensors)
    as the file "Fooocus\models\checkpoints\sd_xl_base_1.0_0.9vae.safetensors".
 2. It will
    download [sd_xl_refiner_1.0_0.9vae.safetensors from here](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0_0.9vae.safetensors)
@@ -191,34 +229,38 @@ Version</span>):
    download [Fooocus's own inpaint control model from here](https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint.fooocus.patch)
    as the file "Fooocus\models\inpaint\inpaint.fooocus.patch" (the size of this file is 1.28GB).
 
-After Fooocus-Control 2.1.60(*for convenience, the version of fooocus-control follows fooocus*), you will also
-have `run_anime.bat` and `run_realistic.bat`. They are different model presets (and
-requires different models, but thet will be automatically
-downloaded). [Check here for more details](https://github.com/lllyasviel/Fooocus/discussions/679).
+After Fooocus-Control 2.1.60(*for convenience, the version of fooocus-control follows fooocus*),
+you will also have `run_anime.bat` and `run_realistic.bat`.
+They are different model presets (and requires different models, but they will be automatically downloaded).
+[Check here for more details](https://github.com/lllyasviel/Fooocus/discussions/679).
 
 ![image](https://github.com/lllyasviel/Fooocus/assets/19834515/d386f817-4bd7-490c-ad89-c1e228c23447)
 
-If you already have these files, you can copy them to the above locations to speed up installation.
+🚀If you already have these files, you can copy them to the above locations to speed up installation.🚀
 
 Note that if you see **"MetadataIncompleteBuffer" or "PytorchStreamReader"**, then your model files are corrupted.
 Please download models again.
 
-Below is a test on a relatively low-end laptop with **16GB System RAM** and **6GB VRAM** (Nvidia 3060 laptop). The speed
-on this machine is about 1.35 seconds per iteration. Pretty impressive – nowadays laptops with 3060 are usually at very
-acceptable price.
+Below is a test on a relatively low-end laptop with **16GB System RAM** and **6GB VRAM** (Nvidia 3060 laptop). The speed on this machine is about 1.35 seconds per iteration.
+Pretty impressive – nowadays laptops with 3060 are usually at very acceptable price.
+
+For faster rendering speeds and reduced computer lag, consider buy more RAM. This is the most cost-effective solution, as RAM is significantly cheaper than graphics memory (VRAM).
+Cost-effective option suggestion: 🚀 32GB of RAM + 8GB of VRAM 🚀or 🚀48GB of RAM + 8GB of VRAM 🚀
 
 ![image](https://github.com/lllyasviel/Fooocus/assets/19834515/938737a5-b105-4f19-b051-81356cb7c495)
 
-Besides, recently many other software report that Nvidia driver above 532 is sometimes 10x slower than Nvidia driver
+Besides, recently many other software report that Nvidia driver above 532 is sometimes 10x slower than Nvidia driver 531.
+If your generation time is very long, consider
 
-531. If your generation time is very long, consider
-     download [Nvidia Driver 531 Laptop](https://www.nvidia.com/download/driverResults.aspx/199991/en-us/)
-     or [Nvidia Driver 531 Desktop](https://www.nvidia.com/download/driverResults.aspx/199990/en-us/).
+* 🚀download [Nvidia Driver 531 Laptop](https://www.nvidia.com/download/driverResults.aspx/199991/en-us/)
+* 🚀or [Nvidia Driver 531 Desktop](https://www.nvidia.com/download/driverResults.aspx/199990/en-us/).
 
 Note that the minimal requirement is **4GB Nvidia GPU memory (4GB VRAM)** and **8GB system memory (8GB RAM)**. This
 requires using Microsoft’s Virtual Swap technique, which is automatically enabled by your Windows installation in most
 cases, so you often do not need to do anything about it. However, if you are not sure, or if you manually turned it
 off (would anyone really do that?), or **if you see any "RuntimeError: CPUAllocator"**, you can enable it here:
+
+
 
 <details>
 <summary>Click here to the see the image instruction. </summary>
@@ -230,9 +272,13 @@ off (would anyone really do that?), or **if you see any "RuntimeError: CPUAlloca
 </details>
 
 Please open an issue if you use similar devices but still cannot achieve acceptable performances.
+</details>
+</details>
 
 ### Colab
 
+<details>
+<summary>Click here to the see</summary>
 (Last tested - 2023 Oct 10)
 
 | Colab                                                                                                                                                                                 | Info                    |
@@ -242,9 +288,12 @@ Please open an issue if you use similar devices but still cannot achieve accepta
 Note that this Colab will disable refiner by default because Colab free's resource is relatively limited.
 
 Thanks to [camenduru](https://github.com/camenduru)!
+</details>
 
 ### Linux (Using Anaconda)
 
+<details>
+<summary>Click here to the see</summary>
 If you want to use Anaconda/Miniconda, you can
 
     git clone https://github.com/fenneishi/Fooocus-Control.git
@@ -270,9 +319,12 @@ Or if you want to open a remote port, use
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
+</details>
 
 ### Linux (Using Python Venv)
 
+<details>
+<summary>Click here to the see</summary>
 Your Linux needs to have **Python 3.10** installed, and lets say your Python can be called with command **python3** with
 your venv system working, you can
 
@@ -294,9 +346,12 @@ Or if you want to open a remote port, use
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
+</details>
 
 ### Linux (Using native system Python)
 
+<details>
+<summary>Click here to the see</summary>
 If you know what you are doing, and your Linux already has **Python 3.10** installed, and your Python can be called with
 command **python3** (and Pip with **pip3**), you can
 
@@ -314,9 +369,12 @@ Or if you want to open a remote port, use
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
+</details>
 
 ### Linux (AMD GPUs)
 
+<details>
+<summary>Click here to the see</summary>
 Same with the above instructions. You need to change torch to AMD version
 
     pip uninstall torch torchvision torchaudio torchtext functorch xformers 
@@ -326,9 +384,12 @@ AMD is not intensively tested, however. The AMD support is in beta.
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
+</details>
 
 ### Windows(AMD GPUs)
 
+<details>
+<summary>Click here to the see</summary>
 Same with Windows. Download the software, edit the content of `run.bat` as:
 
     .\python_embeded\python.exe -m pip uninstall torch torchvision torchaudio torchtext functorch xformers -y
@@ -342,9 +403,12 @@ AMD is not intensively tested, however. The AMD support is in beta.
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
+</details>
 
 ### Mac
 
+<details>
+<summary>Click here to the see</summary>
 Mac is not intensively tested. Below is an unofficial guideline for using Mac. You can discuss
 problems [here](https://github.com/lllyasviel/Fooocus/pull/129).
 
@@ -368,6 +432,9 @@ computers with dedicated graphics cards.
 
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
+</details>
+
+---
 
 #
 
