@@ -1,10 +1,9 @@
 <div align="center">
 
-| Discord                                                                               | youtube |
-|---------------------------------------------------------------------------------------|---------|
-| [![Open In Colab](asset/discord-icon-svgrepo-com.svg)](https://discord.gg/evHG9KEcxE) |         |
-
 # 🔥🔥🔥Fooocus-Control🔥🔥🔥
+
+| [![Open In Colab](asset/discord-icon-svgrepo-com.svg)](https://discord.gg/evHG9KEcxE) | ...... |
+|---------------------------------------------------------------------------------------|--------|
 
 </div>
 
@@ -122,7 +121,7 @@ Fooocus-Control adds more control to the original Fooocus software.
 
 ---
 
-# [🔖Show Case](#show case)
+
 
 # [🔖Free Install Fooocus-Control](#install)
 
@@ -131,26 +130,30 @@ Fooocus-Control adds more control to the original Fooocus software.
 # <center>🍇show case🍇</center>
 
 # Sketch
-
+Using a sketch image as a prompt input to👉👉👉generate an image incorporating sketch elements.Awesome!!! Can be used for anything now!
 ![image](asset/sketch/snip.png)
 
 ---
 
 # ImagePrompt
-
-![image](asset/ip_depth/snip.png)
+Using an image as a prompt input➕one-sentence description👉👉👉A perfect image.
 ![image](asset/ip/snip.png)
+
+
+# ImagePrompt+Depth
+Background image controls the backgroundposture image➕ controls the pose➕one-sentence description👉👉👉You can achieve any 3D result with the background and pose you desire. 
+![image](asset/ip_depth/snip.png)
 
 ---
 
 # Canny
-
+Picture as a prompt,  AI extracts 3D wireframe information from the image➕one-sentence description👉👉👉A picture that perfectly aligns with 3D wireframe information.
 ![image](asset/canny/snip.png)
 
 ---
 
 # Depth
-
+Picture as a prompt, AI extracts 3D information from the image ➕ one-sentence description👉👉👉A perfectly 3D-informed image.
 ![image](asset/depth/snip.png)
 
 ---
@@ -158,18 +161,18 @@ Fooocus-Control adds more control to the original Fooocus software.
 # Pose
 
 :face
-
+Using a facial pose from an image as a prompt to control input👉👉👉it generates an image with a specific facial pose consistent with it. This is perfect for making model images and design illustrations, it's simply unbeatable!
 ![image](asset/pose_face/snip.png)
 
 ---
 
 # Recolor
-
+Using an image as a prompt input to👉👉👉re-color it.
 ![image](asset/recolor/snip.png)
 
 ---
 
-# <center>🍇install🍇</center>
+# <center>🛠️install🛠️</center>
 
 # install
 
