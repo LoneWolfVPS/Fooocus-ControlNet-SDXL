@@ -175,14 +175,13 @@ Using an image as a prompt input to👉👉👉re-color it.
 ---
 
 # <center>🛠️install🛠️</center>
----
 
 ### Windows
 
 <details>
 <summary>Click here to the see</summary>
 
-1. download the software
+##### 1️⃣ download the software
 
 | version                                    | Description                                                                                            | Suitable For                                                                 | download(Unzip Password:ddert657)                                                                                                           |
 |--------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -191,12 +190,12 @@ Using an image as a prompt input to👉👉👉re-color it.
 | <span style="color:red;"> offline </span>  | without update, <span style="color:red;">pre-download all models</span>  with the installation package | for users with a <span style="color:red;">bad </span> internet connection    | [>>> Click here to download from huggingface <<<]：coming soon(Uploading to Hugging Face always fails😞)                                     |
 |                                            |                                                                                                        |                                                                              | [>>> Click here to download from BaiduNetDisk <<<](https://pan.baidu.com/s/173m6TWu8KZzijVCIO7VMuQ?pwd=1qsd)                                |
 
-2. unzip the file(Unzip Password:ddert657)
+##### 2️⃣ unzip the file(Unzip Password:ddert657)
 
-3. click run.bat to run the software
+##### 3️⃣ click 'run.bat' to run the software
    ![image](asset/run_bat.png)
 
-4. Having fun
+##### 4️⃣ 👏👏👏 Having fun👏👏👏
 
 ##### Q&A
 
@@ -277,6 +276,8 @@ Please open an issue if you use similar devices but still cannot achieve accepta
 </details>
 </details>
 
+---
+
 ### Colab
 
 <details>
@@ -291,6 +292,8 @@ Note that this Colab will disable refiner by default because Colab free's resour
 
 Thanks to [camenduru](https://github.com/camenduru)!
 </details>
+
+---
 
 ### Linux (Using Anaconda)
 
@@ -323,6 +326,8 @@ Use `python entry_with_update.py --preset anime` or `python entry_with_update.py
 Anime/Realistic Edition.
 </details>
 
+---
+
 ### Linux (Using Python Venv)
 
 <details>
@@ -350,6 +355,8 @@ Use `python entry_with_update.py --preset anime` or `python entry_with_update.py
 Anime/Realistic Edition.
 </details>
 
+---
+
 ### Linux (Using native system Python)
 
 <details>
@@ -373,6 +380,8 @@ Use `python entry_with_update.py --preset anime` or `python entry_with_update.py
 Anime/Realistic Edition.
 </details>
 
+---
+
 ### Linux (AMD GPUs)
 
 <details>
@@ -387,6 +396,8 @@ AMD is not intensively tested, however. The AMD support is in beta.
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
 </details>
+
+---
 
 ### Windows(AMD GPUs)
 
@@ -406,6 +417,8 @@ AMD is not intensively tested, however. The AMD support is in beta.
 Use `python entry_with_update.py --preset anime` or `python entry_with_update.py --preset realistic` for Fooocus
 Anime/Realistic Edition.
 </details>
+
+---
 
 ### Mac
 
