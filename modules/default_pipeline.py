@@ -35,7 +35,7 @@ loaded_ControlNets = {}
 @torch.no_grad()
 @torch.inference_mode()
 def refresh_controlnets(models):
-
+    # controlnet : 4.1 loading controlnet + preprocess
     global loaded_ControlNets
 
     def get_paths(ms):
@@ -57,15 +57,19 @@ def refresh_controlnets(models):
         return loader(path_1st if 1 == len(paths) else paths) if not path_1st in loaded_ControlNets else \
             loaded_ControlNets[path_1st]
 
-    loaders = set([m['loader'] for m in models])
-    loaders = {l: [] for l in loaders}
-    for m in models:
-        loaders[m['loader']].append(m)
+    controlnet_models = [m for m in models if m['loader'] == 'ControlNet']
+    cache_controlnet = {get_1st_path(get_paths([m,])): cache_loader('ControlNet', [m,]) for m in controlnet_models}
 
-    cache = {get_1st_path(get_paths(ms)): cache_loader(l, ms) for l, ms in loaders.items()}
+    preprocess_models = [m for m in models if m['loader'] != 'ControlNet']
+    preprocess_loaders = set([m['loader'] for m in preprocess_models])
+    preprocess_loaders = {l: [] for l in preprocess_loaders}
+    for m in preprocess_models:
+        preprocess_loaders[m['loader']].append(m)
+
+    cache_controlnet_preprocess = {get_1st_path(get_paths(ms)): cache_loader(l, ms) for l, ms in preprocess_loaders.items()}
     # cache = {k: v for k, v in cache.items() if k is not None and v is not None}
 
-    loaded_ControlNets = cache
+    loaded_ControlNets =  {**cache_controlnet, **cache_controlnet_preprocess}
     return
 
 

@@ -193,7 +193,8 @@ Using an image as a prompt input to👉👉👉re-color it.
 ##### 2️⃣ unzip the file(Unzip Password:ddert657)
 
 ##### 3️⃣ click 'run.bat' to run the software
-   ![image](asset/run_bat.png)
+
+![image](asset/run_bat.png)
 
 ##### 4️⃣ 👏👏👏 Having fun👏👏👏
 
@@ -451,17 +452,66 @@ Anime/Realistic Edition.
 
 ---
 
-#
+# <center>💤Customization your path💤</center>
+
+<details>
+<summary>click here to show</summary>
+
+
+After the first time you run Fooocus, a config file will be generated at `Fooocus\user_path_config.txt`. This file can
+be edited for changing the model path. You can also change some parameters to turn Fooocus into "your Fooocus".
+
+For
+example ["realisticStockPhoto_v10" is a pretty good model from CivitAI](https://civitai.com/models/139565/realistic-stock-photo).
+This model needs a special `CFG=3.0` and probably works better with some specific styles. Below is an example config to
+turn Fooocus into a **"Fooocus Realistic Stock Photo Software"**:
+
+`Fooocus\user_path_config.txt`:
+
+```json
+{
+  "modelfile_path": "D:\\Fooocus\\models\\checkpoints",
+  "lorafile_path": "D:\\Fooocus\\models\\loras",
+  "vae_approx_path": "D:\\Fooocus\\models\\vae_approx",
+  "upscale_models_path": "D:\\Fooocus\\models\\upscale_models",
+  "inpaint_models_path": "D:\\Fooocus\\models\\inpaint",
+  "controlnet_models_path": "D:\\Fooocus\\models\\controlnet",
+  "clip_vision_models_path": "D:\\Fooocus\\models\\clip_vision",
+  "fooocus_expansion_path": "D:\\Fooocus\\models\\prompt_expansion\\fooocus_expansion",
+  "temp_outputs_path": "D:\\Fooocus\\outputs",
+  "default_model": "realisticStockPhoto_v10.safetensors",
+  "default_refiner": "",
+  "default_lora": "",
+  "default_lora_weight": 0.25,
+  "default_cfg_scale": 3.0,
+  "default_sampler": "dpmpp_2m",
+  "default_scheduler": "karras",
+  "default_negative_prompt": "low quality",
+  "default_positive_prompt": "",
+  "default_styles": [
+    "Fooocus V2",
+    "Default (Slightly Cinematic)",
+    "SAI Photographic"
+  ]
+}
+```
+
+</details>
+
 
 #
-
 #
-
+#
 #
 
 ---
 
-# About Fooocus(Thanks to [lllyasviel](https://github.com/lllyasviel/Fooocus) great work! )
+# <center>🔥About Fooocus(Thanks to [lllyasviel](https://github.com/lllyasviel/Fooocus) great work! )🔥</center>
+
+#  
+
+<details>
+<summary>click here to show </summary>
 
 <img src="https://github.com/lllyasviel/Fooocus/assets/19834515/f79c5981-cf80-4ee3-b06b-3fef3f8bfbc7" width=100%>
 
@@ -636,3 +686,5 @@ styles available in Fooocus.
 ## Update Log
 
 The log is [here](update_log.md).
+</details>
+
