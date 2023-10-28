@@ -4,7 +4,7 @@
 
 </div>
 
-| [![Open In Colab](asset/discord-icon-svgrepo-com.svg)](https://discord.gg/evHG9KEcxE) | 
+| [![Open In Colab](asset/discord-icon-svgrepo-com.svg)](https://discord.gg/evHG9KEcxE) |
 |---------------------------------------------------------------------------------------|
 
 ---
@@ -187,8 +187,10 @@ Using an image as a prompt input to👉👉👉re-color it.
 |--------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | <span style="color:green;"> online </span> | update automatically, download model automatically <span style="color:green;">when needed</span>       | for users with a <span style="color:green;">good </span> internet connection | [>>> Click here to download from huggingface <<<](https://huggingface.co/IiroHabib/FooocusControl/blob/main/FooocusControl_win64_2-1-7.zip) |
 |                                            |                                                                                                        |                                                                              | [>>> Click here to download from BaiduNetDisk <<<](https://pan.baidu.com/share/init?surl=8yMkH0bY8RgkeJWjT7WrEw&pwd=7wyd)                   |
-| <span style="color:red;"> offline </span>  | without update, <span style="color:red;">pre-download all models</span>  with the installation package | for users with a <span style="color:red;">bad </span> internet connection    | [>>> Click here to download from huggingface <<<]：coming soon(Uploading to Hugging Face always fails😞)                                     |
+|                                            |                                                                                                        |                                                                              | [>>> Click here to download from GoogleDrive <<<](https://drive.google.com/file/d/1N2_czIkZi4wOdxXw0Id11nD0Rq5RYve_/view?usp=sharing)       |
+| <span style="color:red;"> offline </span>  | without update, <span style="color:red;">pre-download all models</span>  with the installation package | for users with a <span style="color:red;">bad </span> internet connection    | >>> Click here to download from huggingface <<< (Uploading to Hugging Face always fails😞)                                                  |
 |                                            |                                                                                                        |                                                                              | [>>> Click here to download from BaiduNetDisk <<<](https://pan.baidu.com/s/173m6TWu8KZzijVCIO7VMuQ?pwd=1qsd)                                |
+|                                            |                                                                                                        |                                                                              | [>>> Click here to download from GoogleDrive <<<](https://drive.google.com/file/d/1u8OavD2v5DrSaIdz61C8bI-qrq1shi7A/view?usp=sharing)       |
 
 ##### 2️⃣ unzip the file(Unzip Password:ddert657)
 
@@ -498,17 +500,19 @@ turn Fooocus into a **"Fooocus Realistic Stock Photo Software"**:
 
 </details>
 
+#
 
 #
+
 #
-#
+
 #
 
 ---
 
 # <center>🔥About Fooocus(Thanks to [lllyasviel](https://github.com/lllyasviel/Fooocus) great work! )🔥</center>
 
-#  
+#      
 
 <details>
 <summary>click here to show </summary>
