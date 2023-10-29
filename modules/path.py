@@ -46,13 +46,16 @@ if preset is not None:
     config_dict.update(preset)
 
 
+
+
 def get_dir_or_set_default(key, default_value):
     global config_dict
     v = config_dict.get(key, None)
     if isinstance(v, str) and os.path.exists(v) and os.path.isdir(v):
         return v
     else:
-        dp = os.path.abspath(os.path.join(os.path.dirname(__file__), default_value))
+        root_dir = os.path.abspath(os.path.dirname(__file__))
+        dp = os.path.abspath(os.path.join(root_dir, default_value))
         os.makedirs(dp, exist_ok=True)
         config_dict[key] = dp
         return dp
@@ -582,39 +585,3 @@ def downloading_upscale_model():
 
 
 update_all_model_names()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

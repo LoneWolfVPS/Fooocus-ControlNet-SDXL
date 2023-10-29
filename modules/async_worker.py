@@ -2,6 +2,8 @@ import os.path
 import pathlib
 import threading
 
+import cv2
+
 buffer = []
 outputs = []
 
@@ -72,6 +74,7 @@ def worker():
         uov_input_image = args.pop()
         outpaint_selections = args.pop()
         inpaint_input_image = args.pop()
+        inpaint_input_mask = args.pop()
 
 
         cn_tasks = {
@@ -192,7 +195,17 @@ def worker():
                     current_tab == 'ip' and advanced_parameters.mixing_image_prompt_and_inpaint)) \
                     and isinstance(inpaint_input_image, dict):
                 inpaint_image = inpaint_input_image['image']
-                inpaint_mask = inpaint_input_image['mask'][:, :, 0]
+                if inpaint_input_mask is not None:
+                    # inpaint_mask = np.minimum(inpaint_input_image['mask'][:, :, 0],
+                    #                           cv2.dilate(inpaint_input_mask['image'][:, :, 0],
+                    #                                      np.ones((5, 5), np.uint8),
+                    #                                      iterations=1)
+                    #                           )
+                    inpaint_mask = cv2.dilate(inpaint_input_mask['image'][:, :, 0],
+                                                         np.ones((7, 7), np.uint8),
+                                                         iterations=1)
+                else:
+                    inpaint_mask = inpaint_input_image['mask'][:, :, 0]
                 inpaint_image = HWC3(inpaint_image)
                 if isinstance(inpaint_image, np.ndarray) and isinstance(inpaint_mask, np.ndarray) \
                         and (np.any(inpaint_mask > 127) or len(outpaint_selections) > 0):

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔥🔥🔥Fooocus-Control🔥🔥🔥
+# 🔥🔥🔥Fooocus-ControlNet-SDXL🔥🔥🔥
 
 </div>
 
@@ -9,6 +9,10 @@
 
 ---
 
+# 🚀 Updates
+* **[2023.10.29]** release  [Mask_Inpaint](#MaskInpaint)
+
+---
 
 ![image](asset/ip_depth/ip_depth.png)
 
@@ -42,42 +46,43 @@
 
 ---
 
-Fooocus-Control is a ⭐free⭐ image generating software (based on [Fooocus](https://github.com/lllyasviel/Fooocus)
+Fooocus-ControlNet-SDXL is a ⭐free⭐ image generating software (based on [Fooocus](https://github.com/lllyasviel/Fooocus)
 , [ControlNet](https://github.com/lllyasviel/ControlNet-v1-1-nightly)
 ,👉[SDXL](https://github.com/Stability-AI/generative-models) , [IP-Adapter](https://ip-adapter.github.io/) ,
 etc.).
 
-Fooocus-Control adds more control to the original Fooocus software.
+Fooocus-ControlNet-SDXL adds more control to the original Fooocus software.
 
 ---
 
-| control                                                                                              | status 🚀                     | show case           |
-|------------------------------------------------------------------------------------------------------|-------------------------------|---------------------|
-| image prompt                                                                                         | ✅ provided by fooocus         | [ip](#Image)        |
-| [canny](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-canny)                   | ✅provided by fooocus          | [canny](#Canny)     |
-| cpds                                                                                                 | ✅ provided by fooocus         |                     |
-| [depth](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-depth)                   | ✅ provided by fooocus-control | [depth](#Depth)     |
-| [pose(body,hand,face)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose) | ✅ provided by fooocus-control | [pose](#Pose)       |
-| recolor                                                                                              | ✅ provided by fooocus-control | [recolor](#Recolor) |
-| sketch                                                                                               | ✅ provided by fooocus-control | [sketch](#Sketch)   |
-| [segmentation](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-segmentation)     | 📍 todo                       |                     |
-| [pose(only body)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                       |                     |
-| [pose(only hand)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                       |                     |
-| [pose(only face)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                       |                     |
-| [pose(body+hand)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                       |                     |
-| [pose(body+face)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                       |                     |
-| [Scribble](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-scribble)             | 📍 todo                       |                     |
-| [Soft Edges](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-soft-edge)          | 📍 todo                       |                     |
-| [Linear](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-lineart)                | 📍 todo                       |                     |
-| [Anime Linear](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-anime-lineart)    | 📍 todo                       |                     |
-| [Tile](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-tile)                     | 📍 todo                       |                     |
-| [relighing]()                                                                                        | 📍 todo                       |                     |
-| [newBackground]()                                                                                    | 📍 todo                       |                     |
-| etc                                                                                                  | 📍 todo                       |                     |
+| control                                                                                              | status 🚀                             | show case            |
+|------------------------------------------------------------------------------------------------------|---------------------------------------|----------------------|
+| image prompt                                                                                         | ✅ provided by fooocus                 | [ip](#Image)         |
+| [canny](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-canny)                   | ✅provided by fooocus                  | [canny](#Canny)      |
+| cpds                                                                                                 | ✅ provided by fooocus                 |                      |
+| [depth](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-depth)                   | ✅ provided by Fooocus-ControlNet-SDXL | [depth](#Depth)      |
+| [pose(body,hand,face)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose) | ✅ provided by Fooocus-ControlNet-SDXL | [pose](#Pose)        |
+| recolor                                                                                              | ✅ provided by Fooocus-ControlNet-SDXL | [recolor](#Recolor)  |
+| sketch                                                                                               | ✅ provided by Fooocus-ControlNet-SDXL | [sketch](#Sketch)    |
+| [segmentation](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-segmentation)     | 📍 todo                               |                      |
+| [pose(only body)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                               |                      |
+| [pose(only hand)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                               |                      |
+| [pose(only face)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                               |                      |
+| [pose(body+hand)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                               |                      |
+| [pose(body+face)](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-openpose)      | 📍 todo                               |                      |
+| [Scribble](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-scribble)             | 📍 todo                               |                      |
+| [Soft Edges](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-soft-edge)          | 📍 todo                               |                      |
+| [Linear](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-lineart)                | 📍 todo                               |                      |
+| [Anime Linear](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-anime-lineart)    | 📍 todo                               |                      |
+| [Tile](https://github.com/lllyasviel/ControlNet-v1-1-nightly#controlnet-11-tile)                     | 📍 todo                               |                      |
+| [relighing]()                                                                                        | 📍 todo                               |                      |
+| [mask InPaint]()                                                                                     | ✅ provided by Fooocus-ControlNet-SDXL | [mask](#MaskInpaint) |
+| [newBackground]()                                                                                    | 📍 todo                               |                      |
+| etc                                                                                                  | 📍 todo                               |                      |
 
 ---
 
-### 💡 Fooocus-Control keeps it simple
+### 💡 Fooocus-ControlNet-SDXL keeps it simple
 
 - Fooocus is an excellent SDXL-based software, which provides excellent generation effects based on the simplicity of
   liking midjourney, while being free as stable diffusion.
@@ -88,16 +93,16 @@ Fooocus-Control adds more control to the original Fooocus software.
   image preprocessing, etc. Users don't need to bother with any of this at all, you just need to check the desired image
   control method.
 
-### 💡 Fooocus-Control facilitates secondary development
+### 💡 Fooocus-ControlNet-SDXL facilitates secondary development
 
-- Fooocus-Control simplifies the way fooocus integrates with controlnet by simply defining pre-processing and adding
+- Fooocus-ControlNet-SDXL simplifies the way fooocus integrates with controlnet by simply defining pre-processing and adding
   configuration files.
-- If you are a developer with your own unique controlnet model , with Fooocus-Control , you can easily integrate it into
+- If you are a developer with your own unique controlnet model , with Fooocus-ControlNet-SDXL , you can easily integrate it into
   fooocus .
 - In addition to controlnet, FooocusControl plans to continue to integrate ip-adapter and other models to further
   provide users with more control methods.
 
-### 💡 Fooocus-Control pursues the 📍out-of-the-box use of software📍
+### 💡 Fooocus-ControlNet-SDXL pursues the 📍out-of-the-box use of software📍
 
 - Free software usually encounters a lot of installation and use of the problem, such as 😞 network problems caused by the
   model file that can not be downloaded and updated 😞, 😞a variety of headaches gpu driver😞, 😞plug-ins lack of dependent
@@ -116,11 +121,11 @@ Fooocus-Control adds more control to the original Fooocus software.
 - FooocusControl将会针对每一个模型添加多个下载源(即将上线)，防止因网络问题导致模型无法下载或者更新..
 - windows平台上offline下载方式基本避免网络问题
 - 中文翻译(即将上线)
-- 代码码云镜像(https://gitee.com/fenneishi/Fooocus-Control)
+- 代码码云镜像(https://gitee.com/fenneishi/Fooocus-ControlNet-SDXL)
 
 ---
 
-# [🔖Free Install Fooocus-Control](#%EF%B8%8Finstall%EF%B8%8F)
+# [🔖Free Install Fooocus-ControlNet-SDXL](#%EF%B8%8Finstall%EF%B8%8F)
 
 ---
 
@@ -172,6 +177,10 @@ Using a facial pose from an image as a prompt to control input👉👉👉it gen
 Using an image as a prompt input to👉👉👉re-color it.
 ![image](asset/recolor/snip.png)
 
+# MaskInpaint
+
+![image](asset/inpaint_outpaint/mask_inpaint.png)
+
 ---
 
 # <center>🛠️install🛠️</center>
@@ -204,21 +213,21 @@ Using an image as a prompt input to👉👉👉re-color it.
 
 <details>
 <summary>Q: Do I need to download the original fooocus software?</summary>
-No, you don't need to. Fooocus-Control is a standalone software, not a fooocus plugin. 
+No, you don't need to. Fooocus-ControlNet-SDXL is a standalone software, not a fooocus plugin. 
 Like most other software in the world, all you need to do is download (and unzip) -> launch it, there's nothing else required.
 </details>
 
 <details>
 <summary> Q: What is 'run_anime.bat' used for?</summary>
-'run.bat' will enable the generic version of Fooocus-Control, while 'run_anime.bat' will start the animated version of Fooocus-Control. 
-The animated version of Fooocus-Control doesn't have any magical spells inside; 
+'run.bat' will enable the generic version of Fooocus-ControlNet-SDXL, while 'run_anime.bat' will start the animated version of Fooocus-ControlNet-SDXL. 
+The animated version of Fooocus-ControlNet-SDXL doesn't have any magical spells inside; 
 it simply changes some default configurations from the generic version. 
 You can try launching both the generic and animated versions separately to see if there are any differences in the user interface.
 </details>
 
 <details>
 <summary>Q: What is 'run_realistic.bat' used for?</summary>
-Realistic version of Fooocus-Control
+Realistic version of Fooocus-ControlNet-SDXL
 </details>
 
 <details>
@@ -233,7 +242,7 @@ In the first time you launch the software, it will automatically download models
    download [Fooocus's own inpaint control model from here](https://huggingface.co/lllyasviel/fooocus_inpaint/resolve/main/inpaint.fooocus.patch)
    as the file "Fooocus\models\inpaint\inpaint.fooocus.patch" (the size of this file is 1.28GB).
 
-After Fooocus-Control 2.1.60(*for convenience, the version of fooocus-control follows fooocus*),
+After Fooocus-ControlNet-SDXL 2.1.60(*for convenience, the version of Fooocus-ControlNet-SDXL follows fooocus*),
 you will also have `run_anime.bat` and `run_realistic.bat`.
 They are different model presets (and requires different models, but they will be automatically downloaded).
 [Check here for more details](https://github.com/lllyasviel/Fooocus/discussions/679).
@@ -287,9 +296,9 @@ Please open an issue if you use similar devices but still cannot achieve accepta
 <summary>Click here to the see</summary>
 (Last tested - 2023 Oct 10)
 
-| Colab                                                                                                                                                                                 | Info                    |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|
-| [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fenneishi/Fooocus-Control/blob/main/fooocusControl_colab.ipynb) | FooocusControl Official |
+| Colab                                                                                                                                                                                         | Info                    |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|
+| [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fenneishi/Fooocus-ControlNet-SDXL/blob/main/fooocusControl_colab.ipynb) | FooocusControl Official |
 
 Note that this Colab will disable refiner by default because Colab free's resource is relatively limited.
 
@@ -304,7 +313,7 @@ Thanks to [camenduru](https://github.com/camenduru)!
 <summary>Click here to the see</summary>
 If you want to use Anaconda/Miniconda, you can
 
-    git clone https://github.com/fenneishi/Fooocus-Control.git
+    git clone https://github.com/fenneishi/Fooocus-ControlNet-SDXL.git
     cd Fooocus
     conda env create -f environment.yaml
     conda activate fooocusControl
@@ -338,7 +347,7 @@ Anime/Realistic Edition.
 Your Linux needs to have **Python 3.10** installed, and lets say your Python can be called with command **python3** with
 your venv system working, you can
 
-    git clone https://github.com/fenneishi/Fooocus-Control.git
+    git clone https://github.com/fenneishi/Fooocus-ControlNet-SDXL.git
     cd Fooocus
     python3 -m venv fooocus_control_env
     source fooocus_control_env/bin/activate
@@ -367,7 +376,7 @@ Anime/Realistic Edition.
 If you know what you are doing, and your Linux already has **Python 3.10** installed, and your Python can be called with
 command **python3** (and Pip with **pip3**), you can
 
-    git clone https://github.com/fenneishi/Fooocus-Control.git
+    git clone https://github.com/fenneishi/Fooocus-ControlNet-SDXL.git
     cd Fooocus
     pip3 install pygit2==1.12.2
 
@@ -439,7 +448,7 @@ computers with dedicated graphics cards.
    the [Accelerated PyTorch training on Mac](https://developer.apple.com/metal/pytorch/) Apple Developer guide for
    instructions. Make sure pytorch recognizes your MPS device.
 1. Open the macOS Terminal app and clone this repository
-   with `git clone https://github.com/fenneishi/Fooocus-Control.git`.
+   with `git clone https://github.com/fenneishi/Fooocus-ControlNet-SDXL.git`.
 1. Change to the new Fooocus directory, `cd Fooocus`.
 1. Create a new conda environment, `conda env create -f environment.yaml`.
 1. Activate your new conda environment, `conda activate fooocusControl`.
@@ -512,7 +521,7 @@ turn Fooocus into a **"Fooocus Realistic Stock Photo Software"**:
 
 # <center>🔥About Fooocus(Thanks to [lllyasviel](https://github.com/lllyasviel/Fooocus) great work! )🔥</center>
 
-#      
+#          
 
 <details>
 <summary>click here to show </summary>

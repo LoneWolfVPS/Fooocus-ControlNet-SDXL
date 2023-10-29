@@ -35,7 +35,7 @@ loaded_ControlNets = {}
 @torch.no_grad()
 @torch.inference_mode()
 def refresh_controlnets(models):
-    # controlnet : 4.1 loading controlnet + preprocess
+
     global loaded_ControlNets
 
     def get_paths(ms):
