@@ -5,7 +5,7 @@ import sys
 root = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(root)
 os.chdir(root)
-always_update = False
+always_update = True
 
 if(always_update):
     try:
@@ -43,5 +43,5 @@ if(always_update):
         print('Update failed.')
         print(str(e))
 
-# print('Update succeeded.')
+print('Update succeeded.')
 from launch import *
