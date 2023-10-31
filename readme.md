@@ -12,6 +12,9 @@
 # 🚀 Updates
 
 * **[2023.10.29]** release  [Mask_Inpaint](#MaskInpaint)
+---
+
+![image prompt (1)](https://github.com/fenneishi/Fooocus-ControlNet-SDXL/assets/33345538/566422f4-208e-4b88-a449-54a02f1e9712)
 
 ---
 
