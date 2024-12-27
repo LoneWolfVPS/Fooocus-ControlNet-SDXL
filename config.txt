@@ -1,0 +1,49 @@
+{
+    "path_checkpoints": [
+        "/content/Fooocus-ControlNet-SDXL/models/checkpoints"
+    ],
+    "path_loras": [
+        "/content/Fooocus-ControlNet-SDXL/models/loras"
+    ],
+    "path_embeddings": "/content/Fooocus-ControlNet-SDXL/models/embeddings",
+    "path_vae_approx": "/content/Fooocus-ControlNet-SDXL/models/vae_approx",
+    "path_vae": "/content/Fooocus-ControlNet-SDXL/models/vae",
+    "path_upscale_models": "/content/Fooocus-ControlNet-SDXL/models/upscale_models",
+    "path_inpaint": "/content/Fooocus-ControlNet-SDXL/models/inpaint",
+    "path_controlnet": "/content/Fooocus-ControlNet-SDXL/models/controlnet",
+    "path_clip_vision": "/content/Fooocus-ControlNet-SDXL/models/clip_vision",
+    "path_Fooocus-ControlNet-SDXL_expansion": "/content/Fooocus-ControlNet-SDXL/models/prompt_expansion/Fooocus-ControlNet-SDXL_expansion",
+    "path_wildcards": "/content/Fooocus-ControlNet-SDXL/wildcards",
+    "path_safety_checker": "/content/Fooocus-ControlNet-SDXL/models/safety_checker",
+    "path_sam": "/content/Fooocus-ControlNet-SDXL/models/sam",
+    "path_outputs": "/content/drive/MyDrive/outputs",
+    "available_aspect_ratios": [
+        "704*1408",
+        "704*1344",
+        "768*1344",
+        "768*1280",
+        "832*1216",
+        "832*1152",
+        "896*1152",
+        "896*1088",
+        "960*1088",
+        "960*1024",
+        "1024*1024",
+        "1024*960",
+        "1088*960",
+        "1088*896",
+        "1152*896",
+        "1152*832",
+        "1216*832",
+        "1280*768",
+        "1344*768",
+        "1344*704",
+        "1408*704",
+        "512*768",
+        "1536*640",
+        "512*512",
+        "768*768",
+        "640*768"
+    ],
+    "default_aspect_ratio": "832*1216"
+}
